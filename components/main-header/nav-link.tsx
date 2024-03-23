@@ -3,7 +3,12 @@ import { usePathname } from "next/navigation";
 import classes from "./nav-link.module.css";
 import Link from "next/link";
 
-export default function NavLink({href, children}) {
+interface NavLinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+export default function NavLink({href, children} : NavLinkProps) {
   const path = usePathname();
 
   return (
