@@ -1,0 +1,32 @@
+.active {
+    color: rgb(177, 177, 177);
+    opacity: 55%;
+    /* background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; */
+  }
+
+  .active span {
+    color: rgb(177, 177, 177);
+    /* background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; */
+  }
+
+
+  .link {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  .link a:hover,
+  .link a:active {
+    color: rgb(177, 177, 177);
+    /* background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; */
+    text-shadow: 0 0 18px var(--color-abbgrey-200);
+  }

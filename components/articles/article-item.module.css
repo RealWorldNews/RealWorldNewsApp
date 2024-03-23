@@ -1,0 +1,89 @@
+.article {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    border-radius: 4px;
+    box-shadow: 0 0 12px rgba(209, 208, 208, 0.465);
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+  }
+
+.header p {
+  font-family: "Fira Code", monospace;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+  letter-spacing: .15rem;
+}
+  
+  .headerText {
+    padding: 0 1rem 1rem 1rem;
+  }
+  
+  .headerText h2 {
+    margin: 0 auto;
+    font-size: 1.5rem;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .headerText p {
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+  
+  
+  .image {
+    position: relative;
+    height: 15rem;
+    margin: 0 0 4rem;
+  }
+  
+  .article img {
+    object-fit: cover;
+  }
+
+  .article p {
+    color: var(--color-abbgrey-400);
+
+  }
+  
+  .body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+  }
+  
+  .summary {
+    padding: 1rem 1rem 0 1rem;
+  }
+  
+  .actions {
+    padding: 1rem;
+    text-align: right;
+  }
+  
+  .actions a {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--color-abbgrey-400);
+    color: var(--color-abbgrey-50);
+    font-weight: bold;
+    text-decoration: none;
+  }
+  
+  .actions a:hover,
+  .actions a:active {
+    background: var(--color-abbgrey-900);
+    box-shadow: 0 0 12px var(--color-abbgrey-900);
+  }
+
+  .article hr {
+    border: dotted 0.35rem;
+    border-bottom: none;
+    width: 90%;
+    margin: 1rem auto;
+  }

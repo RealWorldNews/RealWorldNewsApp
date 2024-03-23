@@ -1,0 +1,52 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  font-size: 0.75rem;
+}
+
+.nav a {
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.header a {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  text-decoration: none;
+  font-family: "Montserrat", sans-serif;
+}
+
+.highlight {
+  color: white;
+  font-family: "Montserrat", sans-serif;
+  letter-spacing: 0.15rem;
+  font-size: 1rem;
+}
+
+.nav a:hover,
+.nav a:active,
+.header a:hover,
+.header a:active {
+  color: rgb(177, 177, 177);
+  opacity: 65%;
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: 2rem 10%;
+  }
+}
