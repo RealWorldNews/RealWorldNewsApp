@@ -10,7 +10,6 @@ export async function getArticles(): Promise<Article[]> {
       },
     });
     await prisma.$disconnect();
-    revalidatePath("/", "layout");
     return articles;
   } catch (error) {
     console.error(error);
@@ -25,13 +24,16 @@ export async function getArticle(slug: string): Promise<Article> {
       where: {
         slug: slug,
       },
-    })
+    });
     await prisma.$disconnect();
-    return article
+    if (article === null) {
+      throw new Error(`Article with slug '${slug}' not found.`);
+    }
+    return article;
   } catch (error) {
     console.error(error);
     await prisma.$disconnect();
-    process.exit(1)
+    throw error; // Rethrow the error instead of process.exit
   }
 }
 
