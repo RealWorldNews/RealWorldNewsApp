@@ -9,7 +9,7 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
-model Trip {
+model Article {
   id        String     @default(cuid()) @id
   slug      String@unique
   headline  String
@@ -17,6 +17,6 @@ model Trip {
   body      String
   location  String
   media     String
-  date      Date
+  date      DateTime
 }
 

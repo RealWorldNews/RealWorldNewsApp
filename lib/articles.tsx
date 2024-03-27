@@ -1,15 +1,39 @@
-import sql from 'better-sqlite3'
-import {Article} from '../types/article'
+import { prisma } from "@/lib/prisma";
+import { Article } from "../types/article";
+import { revalidatePath } from "next/cache";
 
-const db = sql('articles.db')
 export async function getArticles(): Promise<Article[]> {
-    await new Promise((resolve) => setTimeout(resolve,2000))
-    return db.prepare('SELECT * FROM articles').all();
+  try {
+    const articles = await prisma.article.findMany({
+      orderBy: {
+        id: "desc",
+      },
+    });
+    await prisma.$disconnect();
+    revalidatePath("/", "layout");
+    return articles;
+  } catch (error) {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
 }
 
-export function getArticle(slug: string): Article {
-    return db.prepare("SELECT * FROM articles WHERE slug =?").get(slug);
+export async function getArticle(slug: string): Promise<Article> {
+  try {
+    const article = await prisma.article.findUnique({
+      where: {
+        slug: slug,
+      },
+    })
+    await prisma.$disconnect();
+    return article
+  } catch (error) {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1)
   }
+}
 
 // import { Article } from "../types/article";
 // import cheerio from "cheerio";
@@ -85,4 +109,3 @@ export function getArticle(slug: string): Article {
 //       return "/"; // or a fallback URL/image you'd prefer
 //     }
 //   }
-  

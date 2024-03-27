@@ -14,7 +14,7 @@ interface Article {
 
 const dummyArticles: Article[] = [
   {
-    slug: "article1",
+    slug: "articl01",
     headline: "US top diplomat holds talks in Israel as Netanyahu vows Rafah invasion",
     summary: "Gunmen in combat fatigues",
     body: "Following a meeting with visiting US Secretary of State Antony Blinken on Friday, Netanyahu said he told the US official there was no other way to defeat Hamas.",

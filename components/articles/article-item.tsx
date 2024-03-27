@@ -7,7 +7,7 @@ import Link from "next/link";
 interface ArticleItemProps {
   slug: string;
   headline: string;
-  body: string;
+  summary: string;
   location: string;
   media: string;
   date: Date;
@@ -21,8 +21,8 @@ const isVideo = (media: string): boolean => {
 export default function ArticleItem({
   slug,
   headline,
+  summary,
   location,
-  body,
   media,
   date,
 }: ArticleItemProps) {
@@ -50,7 +50,7 @@ export default function ArticleItem({
               )}
         </div>
       <div className={classes.body}>
-        <p className={classes.summary}>{body}</p>
+        <p className={classes.summary}>{summary}</p>
         <div className={classes.actions}>
           <Link href={`/articles/${slug}`}>View Details</Link>
         </div>

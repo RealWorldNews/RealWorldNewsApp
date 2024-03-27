@@ -13,7 +13,6 @@ const humanReadableDate = (date: Date) => {
 
 export default async function Home() {
   const articles: Article[]= await getArticles();
-  console.log(articles.length)
 
   return (
     <main className={classes.header}>
