@@ -2,16 +2,8 @@ import classes from "./article-item.module.css";
 import Video from "../video";
 import Image from "next/image";
 import Link from "next/link";
+import { Article } from '@/types/article'
 
-
-interface ArticleItemProps {
-  slug: string;
-  headline: string;
-  body: string;
-  location: string;
-  media: string;
-  date: Date;
-}
 
 const isVideo = (media: string): boolean => {
   const videoIndicators = ["video", ".mp4", ".webm", ".ogg"];
@@ -21,11 +13,11 @@ const isVideo = (media: string): boolean => {
 export default function ArticleItem({
   slug,
   headline,
+  summary,
   location,
-  body,
   media,
   date,
-}: ArticleItemProps) {
+} : Article) {
   const mediaIsVideo = isVideo(media);
   const humanReadableDate = new Date(date).toLocaleDateString('en-US', {
     month: 'long',
@@ -50,7 +42,7 @@ export default function ArticleItem({
               )}
         </div>
       <div className={classes.body}>
-        <p className={classes.summary}>{body}</p>
+        <p className={classes.summary}>{summary}</p>
         <div className={classes.actions}>
           <Link href={`/articles/${slug}`}>View Details</Link>
         </div>

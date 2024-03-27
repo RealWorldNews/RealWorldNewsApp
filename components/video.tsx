@@ -13,7 +13,7 @@ export default function Video({media} : VideoProps) {
         srcLang="en"
         label="English"
       />
-      Your browser does not support the video tag.
+      Your browser does not support the video tag :c.
     </video>
       );
     }
