@@ -4,7 +4,11 @@ export interface Article {
     headline: string;
     summary?: string;
     body: string;
-    location: string;
+    author: string;
+    resource: string;
     media: string;
+    link: string;
     date: Date;
 }
+
+
