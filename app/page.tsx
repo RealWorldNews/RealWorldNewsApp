@@ -15,13 +15,14 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <main className={classes.header}>
       <SearchBar initialQuery={searchQuery} />
-      {articles.length > 0 ? (
-        <div>
-          <p className={classes.results}>{articles.length} articles found</p>
-          <ArticleGrid articles={articles} />
-        </div>
-      ) : (
-        <p className={classes.noResults}>no articles found...</p>
+      {searchQuery && articles.length > 0 && (
+        <p className={classes.results}>
+          {articles.length} {articles.length === 1 ? "article" : "articles"} found
+        </p>
+      )}
+      <ArticleGrid articles={articles} />
+      {searchQuery && articles.length === 0 && (
+        <p className={classes.noResults}>No articles found...</p>
       )}
     </main>
   );
