@@ -31,7 +31,12 @@
 }
 
 .highlight {
-  color: white;
+  background: var(
+    --gradient-nav
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-family: "Montserrat", sans-serif;
   letter-spacing: 0.15rem;
   font-size: 1rem;
