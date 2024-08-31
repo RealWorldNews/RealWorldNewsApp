@@ -14,6 +14,7 @@ const humanReadableDate = (date: Date) => {
 export default async function Home() {
   const articles: Article[]= await getArticles();
 
+
   return (
     <main className={classes.header}>
       <ArticleGrid articles={articles} />

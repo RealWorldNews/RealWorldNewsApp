@@ -15,8 +15,10 @@ model Article {
   headline  String
   summary   String
   body      String
-  location  String
+  author    String
+  resource  String
   media     String
+  link      String
   date      DateTime
 }
 
