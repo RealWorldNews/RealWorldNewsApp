@@ -1,0 +1,22 @@
+.searchBar {
+    width: 50%;
+    margin: 0 auto;
+    padding: 0.2rem 0;
+    border: none;
+    border-bottom: 1px solid var(--foreground);
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: .75rem;
+    text-align: left;
+  }
+  
+  .searchBar::placeholder {
+    color: var(--foreground);
+  }
+  
+  .searchBar:focus {
+    outline: none;
+    border-bottom-color: var(--foreground);
+    background-color: var(--background); 
+  }
+  
