@@ -12,6 +12,7 @@
   --background:#F2F2F7FF;
   --gradient-nav: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(30, 30, 30, 0.9) 50%, rgba(0, 0, 0, 1) 100%);
   --link: #5AC8FAFF;
+  --blur-rgb: 0, 0, 0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,6 +21,7 @@
     --background: 	#1C1C1EFF;
     --gradient-nav: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(245, 245, 245, 0.9) 50%, rgba(255, 255, 255, 1) 100%);
     --link: #64D2FFFF;
+    --blur-rgb: 255, 255, 255;
   }
 }
 
