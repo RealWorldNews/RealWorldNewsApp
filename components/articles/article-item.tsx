@@ -26,29 +26,33 @@ export default function ArticleItem({
     year: "numeric",
   });
   return (
-    <article className={classes.article}>
-      <header className={classes.header}>
-        <div className={classes.headerText}>
-          <h2>{headline}</h2>
-          {author !== "See article for details" && <p>article by: {author}</p>}
-          
-          <p>{humanReadableDate}</p>
+    <li>
+      <article className={classes.article}>
+        <header className={classes.header}>
+          <div className={classes.headerText}>
+            <h2>{headline}</h2>
+            {author !== "See article for details" && (
+              <p>article by: {author}</p>
+            )}
+
+            <p>{humanReadableDate}</p>
+          </div>
+        </header>
+        <hr />
+        <div className={classes.image}>
+          {mediaIsVideo ? (
+            <Video media={media} />
+          ) : (
+            <Image src={media} alt={slug} fill />
+          )}
         </div>
-      </header>
-      <hr />
-      <div className={classes.image}>
-        {mediaIsVideo ? (
-          <Video media={media} />
-        ) : (
-          <Image src={media} alt={slug} fill />
-        )}
-      </div>
-      <div className={classes.body}>
-        <p className={classes.summary}>{summary}</p>
-        <div className={classes.actions}>
-          <Link href={`/articles/${slug}`}>View Details</Link>
+        <div className={classes.body}>
+          <p className={classes.summary}>{summary}</p>
+          <div className={classes.actions}>
+            <Link href={`/articles/${slug}`}>View Details</Link>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </li>
   );
 }

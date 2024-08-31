@@ -9,9 +9,7 @@ export default function ArticleGrid({ articles }: ArticleGridProps) {
   return (
     <ul className={classes.article}>
       {articles.map((a) => (
-        <li key={a.slug}>
-          <ArticleItem {...a} />
-        </li>
+        <ArticleItem key={a.id} {...a} />
       ))}
     </ul>
   );
