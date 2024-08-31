@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "RWNews🌎",
-  description: "Your source for news in the modern world",
+  description: "Real News, No Ads, Only Facts",
 };
 
 export default function RootLayout({
