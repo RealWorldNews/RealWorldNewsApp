@@ -6,7 +6,7 @@ export async function getArticles(): Promise<Article[]> {
   try {
     const articles = await prisma.article.findMany({
       orderBy: {
-        id: "desc",
+        id: "asc",
       },
     });
     await prisma.$disconnect();
