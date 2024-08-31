@@ -1,9 +1,24 @@
 .header {
     display: flex;
     gap: 3rem;
-    margin: 2rem auto 0;
+    margin: 1rem auto 0;
     width: 90%;
     max-width: 75rem;
     flex-direction: column;
     align-items: center;
+}
+
+.noResults {
+    color: var(--foreground);
+    font-size: .75rem;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.results {
+    color: var(--foreground);
+    font-size: .60rem;
+    text-align: center;
+    margin-top: -2.75rem;
+    margin-bottom: 2rem;
 }

@@ -2,22 +2,27 @@ import ArticleGrid from "@/components/articles/article-grid";
 import { Article } from "../types/article";
 import classes from "./page.module.css";
 import { getArticles } from "@/lib/articles";
+import SearchBar from "@/components/search/search-bar";
 
+interface HomeProps {
+  searchParams: { q?: string };
+}
 
-const humanReadableDate = (date: Date) => {
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-};
-
-export default async function Home() {
-  const articles: Article[]= await getArticles();
-
+export default async function Home({ searchParams }: HomeProps) {
+  const searchQuery = searchParams.q || "";
+  const articles: Article[] = await getArticles(searchQuery);
 
   return (
     <main className={classes.header}>
-      <ArticleGrid articles={articles} />
+      <SearchBar initialQuery={searchQuery} />
+      {articles.length > 0 ? (
+        <div>
+          <p className={classes.results}>{articles.length} articles found</p>
+          <ArticleGrid articles={articles} />
+        </div>
+      ) : (
+        <p className={classes.noResults}>no articles found...</p>
+      )}
     </main>
   );
 }
