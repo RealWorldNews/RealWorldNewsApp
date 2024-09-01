@@ -7,7 +7,7 @@ export default function ResourcesPage() {
         <div className={classes.contact}>
         <div>
           <hr />
-          <h2>Write Real World News @</h2>
+          <h2>Write Real World News</h2>
           <MailToButton
             label='RWNews@gmail.com'
             mailto='mailto:contact@distortnewyork.com'
@@ -16,7 +16,7 @@ export default function ResourcesPage() {
             <br/>
           click{' '}
           <Link
-            href="https://donate.stripe.com/5kA7wegxI9Bme4g289"
+            href="https://buy.stripe.com/cN27wea9keVG7FS5kn"
             target='_blank'
             rel='noopener noreferrer'
           > here 🖤 </Link>{' '} to donate
