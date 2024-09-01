@@ -37,11 +37,11 @@
 .button svg {
   width: 26px;
   height: 26px;
-  fill: black;
+  fill: var(--foreground); /* Default color */
 }
 
 .button:hover svg {
-  fill: #555;
+  opacity: 65%;
 }
 
 .pageNumber {
@@ -52,15 +52,13 @@
   display: flex;
   align-items: center;
   margin: 0 5px;
-  color: rgb(239, 239, 239); /* Default color */
+  color: var(--foreground); /* Default color */
 }
 
 .pageNumber:hover {
-  color: #555;
+  opacity: 65%;/* Hover color */
 }
 
 .pageNumber.active {
-  font-weight: bold;
-  color: #555; /* Highlight color for active page */
-  border-bottom: 2px solid #555; /* Optional: add an underline to the active page */
+  opacity: 65%; /* Optional: add an underline to the active page */
 }

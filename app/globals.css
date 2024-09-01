@@ -15,7 +15,7 @@
   --blur-rgb: 0, 0, 0;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --foreground: #EBEBF599;
     --background: 	#1C1C1EFF;
