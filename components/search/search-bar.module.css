@@ -1,7 +1,6 @@
 .searchBar {
     width: 50%;
-    margin: 0 auto;
-    padding: 0.2rem 0;
+    margin: -1.3rem auto .5rem;
     border: none;
     border-bottom: 1px solid var(--foreground);
     background-color: var(--background);
