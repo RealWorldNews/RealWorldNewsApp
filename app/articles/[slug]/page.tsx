@@ -46,7 +46,7 @@ export default async function ArticleDetailPage({
           </Link>
           <div className={classes.info}>
             {article.author !== "See article for details" && (
-              <p>article by: {article.author}</p>
+              <p>by: {article.author}</p>
             )}
             <p>{article.resource}</p>
             <p>{humanReadableDate}</p>

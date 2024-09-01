@@ -32,7 +32,7 @@ export default function ArticleItem({
           <div className={classes.headerText}>
             <h2>{headline}</h2>
             {author !== "See article for details" && (
-              <p>article by: {author}</p>
+              <p>by: {author}</p>
             )}
 
             <p>{humanReadableDate}</p>
