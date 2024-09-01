@@ -1,5 +1,10 @@
 import Link from 'next/link'
-function MailToButton ({ mailto, label }) {
+
+interface MailToButtonProps {
+    mailto: string;
+    label: string;
+}
+function MailToButton ({ mailto, label }: MailToButtonProps) {
     return (
         <Link
             href="#"
