@@ -72,7 +72,8 @@
   }
   
   .actions a:hover,
-  .actions a:active {
+  .actions a:active,
+  .header h2:hover {
     opacity: 65%;
   }
 
