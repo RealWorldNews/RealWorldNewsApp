@@ -34,7 +34,7 @@ export default function SearchBar({ initialQuery }: SearchBarProps) {
       type="text"
       value={search}
       onChange={handleSearch}
-      placeholder="Search ..."
+      placeholder="search ..."
       className={classes.searchBar}
       
     />
