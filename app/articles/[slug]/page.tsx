@@ -36,23 +36,25 @@ export default async function ArticleDetailPage({
         <div className={classes.headerText}>
           <h1>{article.headline}</h1>
           <Link href={article.link}>
-          <div className={classes.image}>
-            {mediaIsVideo ? (
-              <Video media={article.media} />
-            ) : (
-              <Image src={article.media} alt={article.slug} fill />
-            )}
-          </div>
+            <div className={classes.image}>
+              {mediaIsVideo ? (
+                <Video media={article.media} />
+              ) : (
+                <Image src={article.media} alt={article.slug} fill />
+              )}
+            </div>
           </Link>
-          {article.author !== "See article for details" && (
-            <p>article by: {article.author}</p>
-          )}
-          <p>{article.resource}</p>
-          <p>{humanReadableDate}</p>
+          <div className={classes.info}>
+            {article.author !== "See article for details" && (
+              <p>article by: {article.author}</p>
+            )}
+            <p>{article.resource}</p>
+            <p>{humanReadableDate}</p>
+          </div>
         </div>
         <main>
           <p
-            className={classes.instructions}
+            className={classes.description}
             dangerouslySetInnerHTML={{
               __html: article.body,
             }}

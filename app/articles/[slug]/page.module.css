@@ -1,20 +1,18 @@
 .header {
-    display: flex;
-    padding: 2rem 1rem;
-    gap: 3rem;
-    margin: auto;
-    overflow: hidden;
-    max-width: 80rem;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column; 
+  margin: 2rem auto;
+  max-width: 30rem;
+  border-radius: 4px;
+  overflow: hidden;
   }
 
   
   .image {
     position: relative;
-    /* object-fit: contain; */
-    width: 100%;
-    height: 30rem;
+    width: 100%; 
+    height: 20rem; 
+    margin: 0 auto;
   }
   
   .header img {
@@ -39,45 +37,94 @@
     text-shadow: 0 0 0.3rem rgba(var(--blur-rgb), 0.2);
   }
   
-  .creator {
-    font-size: 1.5rem;
-    color: #cfa69b;
-    font-style: italic;
-  }
-  
-  .creator a {
-    background: var(--color-primary-600);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .creator a:hover,
-  .creator a:active {
-    background: var(--color-primary-600);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 18px var(--color-abbgrey-200);
-  }
-  
   .summary {
     font-size: 1.5rem;
   }
-  
-  .instructions {
-    line-height: 1.5;
-    background-color: var(--color-abbgrey-100);
-    color: var(--color-abbgrey-400);
-    border-radius: 8px;
-    padding: 2rem;
-    max-width: 60rem;
-    margin: 2rem auto;
-    animation: fade-slide-in-from-bottom 1s ease-out forwards;
-  }
 
-  .instructions a {
-    color: var(--link);
+  .info {
+    padding: 0.5rem 1rem 0 1rem;
+    letter-spacing: 0.10rem;
+  }
+  
+  .info p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: rgb(177, 177, 177);
+    
+  }
+  
+  .description {
+    font-size: 0.75rem;
+    padding: 1rem;
+    max-width: 60rem;
+  
+  }
+  
+  .description ul {
+    list-style: none;
+    text-align: center;
+    margin: 1;
+    padding: 0;
+  }
+  
+  .description li {
+    text-transform: uppercase;
+  }
+  
+  .description h2 {
+    margin-bottom: auto;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    margin: .5rem;
+  }
+  
+  .description h3 {
+    margin: .5rem;
+    margin: .5rem;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+  }
+  
+  .description h4 {
+    margin: .5rem;
+    margin: .5rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+  
+  .description a {
+    background: var(--color-primary-600); 
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.15rem;
+    text-decoration: none;
+  }
+  
+  .description a:hover,
+  .description a:active,
+  .description a.active {
+  opacity: 50%;
+  }
+  
+  .description p {
+    margin: .5rem;
+    font-size: 0.75rem;
+  }
+  
+  .description em, 
+  .description i {
+        font-family: "Fira Code", monospace;
+        font-optical-sizing: auto;
+        font-weight: 300;
+        font-style: normal;
+  }
+  
+  .description hr {
+    border: dotted var(--color-grey-500) .25rem;
+    border-bottom: none;
+    width: 75%;
+    margin: 1rem auto;
   }
   
   .loading {
