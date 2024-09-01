@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { Article } from "../types/article";
 
-export async function getArticles(searchQuery?: string, page: number = 1, pageSize: number = 10): Promise<{ articles: Article[], totalArticles: number }> {
+export async function getArticles(
+  searchQuery?: string, 
+  page: number = 1, 
+  pageSize: number = 10
+): Promise<{ articles: Article[], totalArticles: number }> {
   try {
-    // Calculate the offset for pagination
-    const skip = (page - 1) * pageSize;
-
-    // Fetch the articles and the total count of articles that match the search query
-    const [articles, totalArticles] = await Promise.all([
+    // Fetch all articles that match the search query, sorted by date
+    const [allArticles, totalArticles] = await Promise.all([
       prisma.article.findMany({
         where: searchQuery
           ? {
@@ -22,8 +23,6 @@ export async function getArticles(searchQuery?: string, page: number = 1, pageSi
         orderBy: {
           date: "desc",
         },
-        skip: skip,
-        take: pageSize,
       }),
       prisma.article.count({
         where: searchQuery
@@ -39,12 +38,40 @@ export async function getArticles(searchQuery?: string, page: number = 1, pageSi
       }),
     ]);
 
-    await prisma.$disconnect();
-    return { articles, totalArticles };
-  } catch (error) {
+    // Group articles by resource
+    const articlesByResource = allArticles.reduce((acc: { [key: string]: Article[] }, article) => {
+      if (!acc[article.resource]) {
+        acc[article.resource] = [];
+      }
+      acc[article.resource].push(article);
+      return acc;
+    }, {});
+
+    // Interleave articles from different resources
+    const staggeredArticles: Article[] = [];
+    while (Object.keys(articlesByResource).length > 0) {
+      for (const resource of Object.keys(articlesByResource)) {
+        if (articlesByResource[resource].length > 0) {
+          staggeredArticles.push(articlesByResource[resource].shift()!);
+        }
+        if (articlesByResource[resource].length === 0) {
+          delete articlesByResource[resource];
+        }
+      }
+    }
+
+    // Handle pagination
+    const paginatedArticles = staggeredArticles.slice((page - 1) * pageSize, page * pageSize);
+
+    return {
+      articles: paginatedArticles,
+      totalArticles,
+    };
+  } catch (error: any) {
     console.error(error);
+    throw error;
+  } finally {
     await prisma.$disconnect();
-    throw error; // Rethrow the error instead of process.exit
   }
 }
 
