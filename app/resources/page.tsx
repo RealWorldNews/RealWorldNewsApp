@@ -7,7 +7,7 @@ export default function ResourcesPage() {
         <div className={classes.contact}>
         <div>
           <hr />
-          <h2>Write distort new RWNews @:</h2>
+          <h2>Write Real World News @</h2>
           <MailToButton
             label='RWNews@gmail.com'
             mailto='mailto:contact@distortnewyork.com'
