@@ -93,7 +93,7 @@
   }
   
   .description a {
-    background: var(--color-primary-600); 
+    background: var(--link); 
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
