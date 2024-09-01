@@ -15,7 +15,7 @@ export async function getArticles(searchQuery?: string): Promise<Article[]> {
           }
         : {}, 
       orderBy: {
-        id: "asc",
+        date: "asc",
       },
     });
     await prisma.$disconnect();
