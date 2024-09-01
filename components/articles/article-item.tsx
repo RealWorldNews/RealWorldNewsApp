@@ -1,5 +1,5 @@
 import classes from "./article-item.module.css";
-import Video from "../video";
+import Video from "../video/video";
 import Image from "next/image";
 import Link from "next/link";
 import { Article } from "@/types/article";
@@ -29,28 +29,25 @@ export default function ArticleItem({
     <li>
       <article className={classes.article}>
         <header className={classes.header}>
-          <div className={classes.headerText}>
+          <Link href={`/articles/${slug}`}>
             <h2>{headline}</h2>
-            {author !== "See article for details" && (
-              <p>by: {author}</p>
-            )}
-
-            <p>{humanReadableDate}</p>
-          </div>
+          </Link>
+          {author !== "See article for details" && <p>by: {author}</p>}
+          <p>{humanReadableDate}</p>
         </header>
         <hr />
-        <div className={classes.image}>
-          {mediaIsVideo ? (
-            <Video media={media} />
-          ) : (
-            <Image src={media} alt={slug} fill />
-          )}
-        </div>
-        <div className={classes.body}>
-          <p className={classes.summary}>{summary}</p>
-          <div className={classes.actions}>
-            <Link href={`/articles/${slug}`}>View Details</Link>
+        <Link href={`/articles/${slug}`}>
+          <div className={classes.image}>
+            {mediaIsVideo ? (
+              <Video media={media} />
+            ) : (
+              <Image src={media} alt={slug} fill />
+            )}
           </div>
+        </Link>
+        <p className={classes.summary}>{summary}</p>
+        <div className={classes.actions}>
+          <Link href={`/articles/${slug}`}>View Details</Link>
         </div>
       </article>
     </li>

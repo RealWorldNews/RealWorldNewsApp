@@ -2,8 +2,9 @@ import { getArticle } from "@/lib/articles";
 import classes from "./page.module.css";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import Video from "@/components/video";
+import Video from "@/components/video/video";
 import Link from "next/link";
+
 interface ArticleDetailParams {
   params: {
     slug: string;
@@ -34,8 +35,8 @@ export default async function ArticleDetailPage({
     <>
       <header className={classes.header}>
         <div className={classes.headerText}>
-          <h1>{article.headline}</h1>
           <Link href={article.link}>
+          <h1>{article.headline}</h1>
             <div className={classes.image}>
               {mediaIsVideo ? (
                 <Video media={article.media} />
@@ -48,7 +49,9 @@ export default async function ArticleDetailPage({
             {article.author !== "See article for details" && (
               <p>by: {article.author}</p>
             )}
+            <Link href={article.link}>
             <p>{article.resource}</p>
+            </Link>
             <p>{humanReadableDate}</p>
           </div>
         </div>
