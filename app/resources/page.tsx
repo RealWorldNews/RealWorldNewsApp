@@ -64,6 +64,7 @@ export default function ResourcesPage() {
             repression. Please contribute what you can.
           </p>
           <p>When we stand together, we are strong!</p>
+          <br/>
           <Link
             href='https://actionnetwork.org/fundraising/contribute-to-the-atlanta-solidarity-fund'
             target='_blank'
