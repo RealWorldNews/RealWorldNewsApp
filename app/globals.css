@@ -42,6 +42,10 @@ body {
     )
     var(--background);
     margin: 0;
+
+    --muted-text-rgb: 176, 176, 176;
+    --highlight-gradient: linear-gradient(to right, #E61E4D 0%, #E31C5F 50%, #D70466 100%);
+    --violet-rgb: 160, 122, 170;
 }
 
 @layer utilities {
