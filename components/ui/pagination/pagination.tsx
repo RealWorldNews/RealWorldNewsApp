@@ -1,15 +1,18 @@
-'use client'
+// Pagination.tsx
+'use client';
+
 import styles from './pagination.module.css';
 import ChevronRightIcon from '../icons/chevron-right';
-import ChevronLeftIcon from '../icons/chevron-left';
+import ChevronLeftIcon from '../icons/chevron-left'
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  onPageChange: (newPage: number) => void;
+  customClass?: string; // Allow customClass as an optional prop
 }
 
-function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+function Pagination({ currentPage, totalPages, onPageChange, customClass }: PaginationProps) {
   const getDisplayedPageNumbers = () => {
     const totalPageNumbersToShow = 6;
     const halfRange = Math.floor(totalPageNumbersToShow / 2);
@@ -30,7 +33,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) 
   const pageNumbers = getDisplayedPageNumbers();
 
   return (
-    <div className={styles.paginationWrapper}>
+    <div className={`${styles.paginationWrapper} ${customClass ? customClass : ''}`}>
       <div className={styles.pagination}>
         {currentPage > 1 && (
           <button onClick={() => onPageChange(currentPage - 1)} className={styles.button}>
