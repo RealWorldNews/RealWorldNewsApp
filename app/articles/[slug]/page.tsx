@@ -21,7 +21,6 @@ export default async function ArticleDetailPage({
   const article = await getArticle(params.slug);
   const mediaIsVideo = isVideo(article.media);
 
-  console.log("DATE: ", article.date);
 
   const humanReadableDate = new Date(article.date).toLocaleDateString("en-US", {
     month: "long",
@@ -33,7 +32,6 @@ export default async function ArticleDetailPage({
     notFound();
   }
 
-  console.log("humanReadableDate: ", humanReadableDate);
 
   article.body = article.body.replace(/\n/g, "<br />");
 
