@@ -8,13 +8,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const baseUrls: MetadataRoute.Sitemap = [
     {
-      url: "https://distort-apps.vercel.app",
+      url: "https://www.realworldnews.org/",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 1,
     },
     {
-      url: "https://distort-apps.vercel.app/contact",
+      url: "https://www.realworldnews.org/resources",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const projectUrls: MetadataRoute.Sitemap = articles.map((article) => ({
-    url: `https://distort-apps.vercel.app/articles/${article.slug}`,
+    url: `https://www.realworldnews.org/articles/${article.slug}`,
     lastModified: new Date(article.date),
     changeFrequency: "weekly" as const,  
     priority: 0.7,
