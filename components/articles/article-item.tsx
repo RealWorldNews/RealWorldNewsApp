@@ -24,6 +24,7 @@ export default function ArticleItem({
     month: "long",
     day: "numeric",
     year: "numeric",
+    timeZone: "UTC"
   });
   return (
     <li>

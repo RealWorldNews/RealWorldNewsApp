@@ -20,14 +20,20 @@ export default async function ArticleDetailPage({
 }: ArticleDetailParams) {
   const article = await getArticle(params.slug);
   const mediaIsVideo = isVideo(article.media);
+
+  console.log("DATE: ", article.date);
+
   const humanReadableDate = new Date(article.date).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
+    timeZone: "UTC"
   });
   if (!article) {
     notFound();
   }
+
+  console.log("humanReadableDate: ", humanReadableDate);
 
   article.body = article.body.replace(/\n/g, "<br />");
 
@@ -36,7 +42,7 @@ export default async function ArticleDetailPage({
       <header className={classes.header}>
         <div className={classes.headerText}>
           <Link href={article.link}>
-          <h1>{article.headline}</h1>
+            <h1>{article.headline}</h1>
             <div className={classes.image}>
               {mediaIsVideo ? (
                 <Video media={article.media} />
@@ -50,7 +56,7 @@ export default async function ArticleDetailPage({
               <p>by: {article.author}</p>
             )}
             <Link href={article.link}>
-            <p>{article.resource}</p>
+              <p>{article.resource}</p>
             </Link>
             <p>{humanReadableDate}</p>
           </div>
