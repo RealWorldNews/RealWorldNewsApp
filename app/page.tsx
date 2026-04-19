@@ -6,16 +6,7 @@ import SearchBar from "@/components/search/search-bar";
 import ScrollRestorationWrapper from "@/components/articles/scroll-restoration-wrapper";
 import PaginationWrapper from "@/components/ui/pagination/pagination-wrapper"; // Use the new wrapper
 
-interface HomeProps {
-  searchParams: { q?: string; page?: string };
-}
-
-export default async function Home({ searchParams }: HomeProps) {
-  const searchQuery = searchParams.q || "";
-  const currentPage = parseInt(searchParams.page || "1", 10);
-
-  // Fetch articles and total number of articles
-  const { articles, totalArticles } = await getArticles(searchQuery, currentPage);
+export const dynamic = 'force-dynamic';
 
   const totalPages = Math.ceil(totalArticles / 10); // Assuming 10 articles per page
 
