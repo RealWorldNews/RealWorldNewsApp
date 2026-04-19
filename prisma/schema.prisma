@@ -4,19 +4,19 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Article {
-  id        String     @default(cuid()) @id
-  slug      String@unique
+  id        String   @id @default(cuid())
+  slug      String   @unique
   headline  String
-  summary   String
-  body      String
-  location  String
-  media     String
-  date      DateTime
+  summary   String   @default("")
+  body      String   @default("")
+  location  String   @default("")
+  media     String   @default("")
+  date      DateTime @default(now())
 }
 

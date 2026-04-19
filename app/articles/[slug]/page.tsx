@@ -3,10 +3,13 @@ import classes from "./page.module.css";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import Video from '@/components/video'
+
+export const dynamic = 'force-dynamic';
+
 interface ArticleDetailParams {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 const isVideo = (media: string): boolean => {
   const videoIndicators = ["video", ".mp4", ".webm", ".ogg"];
@@ -14,8 +17,8 @@ const isVideo = (media: string): boolean => {
 };
 
 export default async function ArticleDetailPage({ params }: ArticleDetailParams) {
-  
-  const article = await getArticle(params.slug);
+  const { slug } = await params;
+  const article = await getArticle(slug);
   const mediaIsVideo = isVideo(article.media);
   const humanReadableDate = new Date(article.date).toLocaleDateString('en-US', {
     month: 'long',
