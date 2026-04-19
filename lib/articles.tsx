@@ -1,20 +1,77 @@
 import { prisma } from "@/lib/prisma";
 import { Article } from "../types/article";
-import { revalidatePath } from "next/cache";
 
-export async function getArticles(): Promise<Article[]> {
+export async function getArticles(
+  searchQuery?: string, 
+  page: number = 1, 
+  pageSize: number = 10
+): Promise<{ articles: Article[], totalArticles: number }> {
   try {
-    const articles = await prisma.article.findMany({
-      orderBy: {
-        id: "desc",
-      },
-    });
-    await prisma.$disconnect();
-    return articles;
-  } catch (error) {
+    // Fetch all articles that match the search query, sorted by date
+    const [allArticles, totalArticles] = await Promise.all([
+      prisma.article.findMany({
+        where: searchQuery
+          ? {
+              OR: [
+                { body: { contains: searchQuery, mode: "insensitive" } },
+                { headline: { contains: searchQuery, mode: "insensitive" } },
+                { resource: { contains: searchQuery, mode: "insensitive" } },
+                { author: { contains: searchQuery, mode: "insensitive" } },
+              ],
+            }
+          : {}, 
+        orderBy: {
+          date: "desc",
+        },
+      }),
+      prisma.article.count({
+        where: searchQuery
+          ? {
+              OR: [
+                { body: { contains: searchQuery, mode: "insensitive" } },
+                { headline: { contains: searchQuery, mode: "insensitive" } },
+                { resource: { contains: searchQuery, mode: "insensitive" } },
+                { author: { contains: searchQuery, mode: "insensitive" } },
+              ],
+            }
+          : {},
+      }),
+    ]);
+
+    // Group articles by resource
+    const articlesByResource = allArticles.reduce((acc: { [key: string]: Article[] }, article) => {
+      if (!acc[article.resource]) {
+        acc[article.resource] = [];
+      }
+      acc[article.resource].push(article);
+      return acc;
+    }, {});
+
+    // Interleave articles from different resources
+    const staggeredArticles: Article[] = [];
+    while (Object.keys(articlesByResource).length > 0) {
+      for (const resource of Object.keys(articlesByResource)) {
+        if (articlesByResource[resource].length > 0) {
+          staggeredArticles.push(articlesByResource[resource].shift()!);
+        }
+        if (articlesByResource[resource].length === 0) {
+          delete articlesByResource[resource];
+        }
+      }
+    }
+
+    // Handle pagination
+    const paginatedArticles = staggeredArticles.slice((page - 1) * pageSize, page * pageSize);
+
+    return {
+      articles: paginatedArticles,
+      totalArticles,
+    };
+  } catch (error: any) {
     console.error(error);
+    throw error;
+  } finally {
     await prisma.$disconnect();
-    process.exit(1);
   }
 }
 
@@ -33,81 +90,6 @@ export async function getArticle(slug: string): Promise<Article> {
   } catch (error) {
     console.error(error);
     await prisma.$disconnect();
-    throw error; // Rethrow the error instead of process.exit
+    throw error; 
   }
 }
-
-// import { Article } from "../types/article";
-// import cheerio from "cheerio";
-// import axios from "axios";
-// import puppeteer from "puppeteer";
-
-// const baseUrl = "https://www.aljazeera.com";
-
-// export async function scrapeArticles() {
-//   console.log(`Scraping data from ${baseUrl} ...`);
-//   const browser = await puppeteer.launch();
-//   const page = await browser.newPage();
-//   await page.goto(baseUrl, { waitUntil: "networkidle2" });
-
-//   // Extract the first 12 article links
-//   const articleLinks = await page.evaluate(() => {
-//     const links: string[] = [];
-//     const articleElements = document.querySelectorAll('.three-col-layout__stories article a.u-clickable-card__link');
-//     articleElements.forEach((element) => {
-//       const href = (element as HTMLAnchorElement).href; // Type assertion
-//       if (href) links.push(href);
-//     });
-//     return links;
-//   });
-
-//   const articles = [];
-//   for (const link of articleLinks) {
-//     const articleDetails = await scrapeArticleDetails(browser, link);
-//     articles.push(articleDetails);
-//   }
-
-//   await browser.close();
-//   console.log(`Found ${articles.length} articles.`);
-//   return articles;
-// }
-
-// async function scrapeArticleDetails(browser, articleUrl) {
-//   const page = await browser.newPage();
-//   await page.goto(articleUrl, { waitUntil: "networkidle2" });
-
-//   const headline = await page.$eval("h1", (el) => el.innerText);
-//   const body = await page.$eval(".wysiwyg", (el) => el.innerText);
-
-//   let media = await extractMainImage(page);
-
-//   // Extract additional images within the body
-//   const bodyImages = await page.evaluate(() => {
-//     const images = Array.from(document.querySelectorAll('.wysiwyg img'));
-//     return images.map(img => (img as HTMLImageElement).src);
-//   });
-
-//   // Concatenate all images' URLs, including main and body images
-//   const allImages = [media, ...bodyImages].filter(url => url).join(', ');
-
-//   const article = {
-//     headline,
-//     slug: articleUrl.replace(baseUrl, ""),
-//     body,
-//     media: allImages,
-//     date: new Date(),
-//   };
-
-//   await page.close();
-//   return article;
-// }
-
-// async function extractMainImage(page: any): Promise<string> {
-//     try {
-//       const mediaSelector = '.featured-media__image-wrap img';
-//       return await page.$eval(mediaSelector, (img: Element) => (img as HTMLImageElement).src);
-//     } catch (error) {
-//       console.log('Main image not found, using fallback.');
-//       return "/"; // or a fallback URL/image you'd prefer
-//     }
-//   }

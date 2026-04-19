@@ -20,41 +20,53 @@ export default async function ArticleDetailPage({ params }: ArticleDetailParams)
   const { slug } = await params;
   const article = await getArticle(slug);
   const mediaIsVideo = isVideo(article.media);
-  const humanReadableDate = new Date(article.date).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  })
+
+
+  const humanReadableDate = new Date(article.date).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC"
+  });
   if (!article) {
     notFound();
   }
-  
-  article.body = article.body.replace(/\n/g,'<br />')
 
+
+  article.body = article.body.replace(/\n/g, "<br />");
 
   return (
     <>
       <header className={classes.header}>
         <div className={classes.headerText}>
-        <h1>{article.headline}</h1>
-      <div className={classes.image}>
-          {mediaIsVideo ? (
-            <Video media={article.media} />
-            ) : (
-              <Image src={article.media} alt={article.slug} fill />
+          <Link href={article.link}>
+            <h1>{article.headline}</h1>
+            <div className={classes.image}>
+              {mediaIsVideo ? (
+                <Video media={article.media} />
+              ) : (
+                <Image src={article.media} alt={article.slug} fill />
               )}
-        </div>
-          <p>{article.location}</p>
-          <p>{humanReadableDate}</p>
+            </div>
+          </Link>
+          <div className={classes.info}>
+            {article.author !== "See article for details" && (
+              <p>by: {article.author}</p>
+            )}
+            <Link href={article.link}>
+              <p>{article.resource}</p>
+            </Link>
+            <p>{humanReadableDate}</p>
+          </div>
         </div>
         <main>
-        <p
-          className={classes.instructions}
-          dangerouslySetInnerHTML={{
-            __html: article.body,
-          }}
-        ></p>
-      </main>
+          <p
+            className={classes.description}
+            dangerouslySetInnerHTML={{
+              __html: article.body,
+            }}
+          ></p>
+        </main>
       </header>
     </>
   );

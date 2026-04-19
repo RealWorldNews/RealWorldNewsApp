@@ -1,9 +1,8 @@
 import classes from "./article-item.module.css";
-import Video from "../video";
+import Video from "../video/video";
 import Image from "next/image";
 import Link from "next/link";
-import { Article } from '@/types/article'
-
+import { Article } from "@/types/article";
 
 const isVideo = (media: string): boolean => {
   const videoIndicators = ["video", ".mp4", ".webm", ".ogg"];
@@ -14,39 +13,44 @@ export default function ArticleItem({
   slug,
   headline,
   summary,
-  location,
+  resource,
   media,
+  author,
+  link,
   date,
-} : Article) {
+}: Article) {
   const mediaIsVideo = isVideo(media);
-  const humanReadableDate = new Date(date).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  })
+  const humanReadableDate = new Date(date).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC"
+  });
   return (
-    <article className={classes.article}>
-      <header className={classes.header}>
-        <div className={classes.headerText}>
-          <h2>{headline}</h2>
-          <p>{location}</p>
+    <li>
+      <article className={classes.article}>
+        <header className={classes.header}>
+          <Link href={`/articles/${slug}`}>
+            <h2>{headline}</h2>
+          </Link>
+          {author !== "See article for details" && <p>by: {author}</p>}
           <p>{humanReadableDate}</p>
-        </div>
-          </header>
-          <hr/>
-        <div className={classes.image}>
-          {mediaIsVideo ? (
-            <Video media={media} />
+        </header>
+        <hr />
+        <Link href={`/articles/${slug}`}>
+          <div className={classes.image}>
+            {mediaIsVideo ? (
+              <Video media={media} />
             ) : (
               <Image src={media} alt={slug} fill />
-              )}
-        </div>
-      <div className={classes.body}>
+            )}
+          </div>
+        </Link>
         <p className={classes.summary}>{summary}</p>
         <div className={classes.actions}>
           <Link href={`/articles/${slug}`}>View Details</Link>
         </div>
-      </div>
-    </article>
+      </article>
+    </li>
   );
 }
