@@ -45,7 +45,7 @@ const EXTRACT_TOOL = {
 }
 
 const REQUEST_TIMEOUT_MS = 75_000
-const REQUEST_MAX_RETRIES = 1
+const REQUEST_MAX_RETRIES = 3
 
 export async function extractArticle(pageText: string): Promise<ExtractedArticle> {
   const res = await client.messages.create(
