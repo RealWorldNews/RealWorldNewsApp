@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getArticle } from "@/lib/articles";
 import classes from "./page.module.css";
 import Image from "next/image";
@@ -7,6 +8,7 @@ import Video from "@/components/video/video";
 import AgeGate from "@/components/articles/age-gate";
 
 const SENSITIVE_SOURCES = new Set(["Borderland Beat"]);
+const SITE_URL = "https://www.realworldnews.org";
 
 export const revalidate = 60;
 
@@ -14,6 +16,50 @@ interface ArticleDetailParams {
   params: Promise<{
     slug: string;
   }>;
+}
+
+function truncate(text: string, max = 160) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  return clean.slice(0, max - 1).trimEnd() + "…";
+}
+
+export async function generateMetadata({
+  params,
+}: ArticleDetailParams): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticle(slug);
+  if (!article) {
+    return {
+      title: "Article not found",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const description = truncate(article.summary || article.body);
+  const url = `/articles/${article.slug}`;
+  const images = article.media ? [{ url: article.media, alt: article.headline }] : undefined;
+
+  return {
+    title: article.headline,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: article.headline,
+      description,
+      url,
+      type: "article",
+      publishedTime: article.date ? new Date(article.date).toISOString() : undefined,
+      authors: article.source ? [article.source] : undefined,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.headline,
+      description,
+      images: article.media ? [article.media] : undefined,
+    },
+  };
 }
 
 export default async function ArticleDetailPage({ params }: ArticleDetailParams) {
@@ -34,8 +80,59 @@ export default async function ArticleDetailPage({ params }: ArticleDetailParams)
 
   const isSensitive = SENSITIVE_SOURCES.has(article.source);
 
+  const articleUrl = `${SITE_URL}/articles/${article.slug}`;
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: article.headline,
+        item: articleUrl,
+      },
+    ],
+  };
+
+  const newsArticleSchema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.headline,
+    description: article.summary || undefined,
+    image: article.media ? [article.media] : undefined,
+    datePublished: article.date ? new Date(article.date).toISOString() : undefined,
+    dateModified: article.date ? new Date(article.date).toISOString() : undefined,
+    author: article.source
+      ? { "@type": "Organization", name: article.source, url: article.sourceUrl || undefined }
+      : undefined,
+    publisher: {
+      "@type": "NewsMediaOrganization",
+      name: "Real World News",
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/header-logo-mono.png`,
+      },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+    isBasedOn: article.sourceUrl || undefined,
+  };
+
   const content = (
     <article className={classes.wrap}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c"),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(newsArticleSchema).replace(/</g, "\\u003c"),
+        }}
+      />
       <Link href="/" className={classes.backLink}>← All articles</Link>
 
       <header className={classes.head}>
