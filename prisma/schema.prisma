@@ -18,6 +18,7 @@ model Article {
   location  String   @default("")
   media     String   @default("")
   videoUrl  String   @default("")
+  author    String   @default("")
   source    String   @default("")
   sourceUrl String   @default("")
   date      DateTime @default(now())

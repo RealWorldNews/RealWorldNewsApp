@@ -103,6 +103,9 @@ async function run() {
         const ogImg = $doc('meta[property="og:image"]').attr('content') ?? ''
         const bodyImg = $doc('.post-body img').first().attr('src') ?? ''
         const heroImg = ogImg || bodyImg
+        const author =
+          $doc('a[rel="author"]').first().text().trim() ||
+          $doc('.meta_pbtauthor').first().text().trim()
         const minimal = buildMinimalDoc(raw)
         log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(heroImg) })
         const data = await extractArticle(minimal)
@@ -117,6 +120,7 @@ async function run() {
           body: data.body,
           location: data.location,
           media: heroImg || data.media,
+          author,
           source: SOURCE_NAME,
           sourceUrl: url,
           date: data.date,

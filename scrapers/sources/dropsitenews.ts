@@ -177,6 +177,12 @@ async function run() {
         const ogImg = $doc('meta[property="og:image"]').attr('content') ?? ''
         const publishedTime = extractPublishedTime($doc)
         const videoUrl = extractVideoUrl(raw)
+        const authorNames: string[] = []
+        $doc('a[href*="substack.com/@"]').each((_, el) => {
+          const name = $doc(el).text().trim()
+          if (name && !authorNames.includes(name)) authorNames.push(name)
+        })
+        const author = authorNames.join(', ')
         const minimal = buildMinimalDoc(raw, videoUrl)
         log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(ogImg), hasVideo: Boolean(videoUrl) })
         const data = await extractArticle(minimal)
@@ -192,6 +198,7 @@ async function run() {
           location: data.location,
           media: ogImg || data.media,
           videoUrl,
+          author,
           source: SOURCE_NAME,
           sourceUrl: url,
           date: toISO(publishedTime || data.date),

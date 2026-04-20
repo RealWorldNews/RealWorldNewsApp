@@ -10,6 +10,7 @@ export default function ArticleItem({
   location,
   media,
   videoUrl,
+  author,
   date,
 }: Article) {
   const humanReadableDate = new Date(date).toLocaleDateString("en-US", {
@@ -41,6 +42,7 @@ export default function ArticleItem({
             <h2>{headline}</h2>
           </Link>
           <div className={classes.meta}>
+            {author && <span>By {author}</span>}
             {location && <span>{location}</span>}
             <span>{humanReadableDate}</span>
           </div>
