@@ -33,7 +33,9 @@ async function dismissPopup(page: Awaited<ReturnType<Browser['newPage']>>) {
   }
 }
 
-async function getArticleLinks(browser: Browser): Promise<string[]> {
+type Candidate = { url: string; author: string }
+
+async function getArticleLinks(browser: Browser): Promise<Candidate[]> {
   const page = await browser.newPage({
     userAgent:
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -42,23 +44,32 @@ async function getArticleLinks(browser: Browser): Promise<string[]> {
     await page.goto(INDEX_URL, { waitUntil: 'domcontentloaded', timeout: 30_000 })
     await dismissPopup(page)
 
-    const hrefs = await page.$$eval(
-      '.arpr_article_preview h2 a, .arpr_article_preview .image a',
-      els => els.map(el => (el as HTMLAnchorElement).getAttribute('href') ?? ''),
-    )
+    const html = await page.content()
+    const $ = cheerio.load(html)
 
     const seen = new Set<string>()
-    const allMatches: string[] = []
-    for (const href of hrefs) {
-      if (!href) continue
+    const candidates: Candidate[] = []
+    let totalCards = 0
+    $('.arpr_article_preview').each((_, card) => {
+      totalCards += 1
+      const $card = $(card)
+      const href = $card.find('h2 a').first().attr('href') ?? $card.find('.image a').first().attr('href') ?? ''
+      if (!href) return
       const full = href.startsWith('http') ? href : `${BASE_URL}${href}`
-      if (!STORY_PATH.test(full)) continue
-      if (seen.has(full)) continue
+      if (!STORY_PATH.test(full)) return
+      if (seen.has(full)) return
       seen.add(full)
-      allMatches.push(full)
-    }
-    log(SOURCE, 'candidates', { totalOnPage: hrefs.length, matchingStoryUrls: allMatches.length })
-    return env.SCRAPE_LIMIT > 0 ? allMatches.slice(0, env.SCRAPE_LIMIT) : allMatches
+
+      const authorNames: string[] = []
+      $card.find('p.author a, .author a, .entry-byline a').each((_, a) => {
+        const name = $(a).text().trim()
+        if (name && !authorNames.includes(name)) authorNames.push(name)
+      })
+      candidates.push({ url: full, author: authorNames.join(', ') })
+    })
+
+    log(SOURCE, 'candidates', { totalCards, matchingStoryUrls: candidates.length })
+    return env.SCRAPE_LIMIT > 0 ? candidates.slice(0, env.SCRAPE_LIMIT) : candidates
   } finally {
     await page.close()
   }
@@ -109,23 +120,23 @@ async function run() {
   const browser = await chromium.launch({ headless: true })
   const payloads: ArticlePayload[] = []
   try {
-    const urls = await getArticleLinks(browser)
-    log(SOURCE, 'found-links', { count: urls.length })
+    const candidates = await getArticleLinks(browser)
+    log(SOURCE, 'found-links', { count: candidates.length })
 
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i]
+    for (let i = 0; i < candidates.length; i++) {
+      const { url, author: listingAuthor } = candidates[i]
       const t0 = Date.now()
-      log(SOURCE, 'extract-start', { index: i + 1, of: urls.length, url })
+      log(SOURCE, 'extract-start', { index: i + 1, of: candidates.length, url })
       try {
         const raw = await getPageText(browser, url)
         const $doc = cheerio.load(raw)
         const ogImg = $doc('meta[property="og:image"]').attr('content') ?? ''
-        const authorNames: string[] = []
+        const slugAuthorNames: string[] = []
         $doc('p.author a, .entry-byline a[href*="/author/"]').each((_, el) => {
           const name = $doc(el).text().trim()
-          if (name && !authorNames.includes(name)) authorNames.push(name)
+          if (name && !slugAuthorNames.includes(name)) slugAuthorNames.push(name)
         })
-        const author = authorNames.join(', ')
+        const author = slugAuthorNames.length > 0 ? slugAuthorNames.join(', ') : listingAuthor
         const minimal = buildMinimalDoc(raw)
         log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(ogImg) })
         const data = await extractArticle(minimal)
