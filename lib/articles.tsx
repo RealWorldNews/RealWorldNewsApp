@@ -27,6 +27,7 @@ export async function getArticles(
           { summary: { contains: searchQuery, mode: "insensitive" as const } },
           { location: { contains: searchQuery, mode: "insensitive" as const } },
           { source: { contains: searchQuery, mode: "insensitive" as const } },
+          { author: { contains: searchQuery, mode: "insensitive" as const } },
         ],
       }
     : {};

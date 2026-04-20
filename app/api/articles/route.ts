@@ -40,6 +40,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: 'Invalid date' }, { status: 422 })
   }
 
+  const oneDayMs = 24 * 60 * 60 * 1000
+  if (parsedDate.getTime() > Date.now() + oneDayMs) {
+    return NextResponse.json({ message: 'Date is in the future' }, { status: 422 })
+  }
+
   const data = {
     slug: slug.trim(),
     headline: headline.trim(),
