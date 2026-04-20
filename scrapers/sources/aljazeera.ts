@@ -49,6 +49,13 @@ async function getArticleLinks(browser: Browser): Promise<string[]> {
   }
 }
 
+function extractAuthor(html: string): string {
+  const $ = cheerio.load(html)
+  const byline = $('.contributors-list--byline').first().clone()
+  byline.find('.contributors-list__by-prefix').remove()
+  return byline.text().replace(/\s+/g, ' ').trim()
+}
+
 function buildMinimalDoc(html: string): string {
   const $ = cheerio.load(html)
 
@@ -99,6 +106,7 @@ async function run() {
       log(SOURCE, 'extract-start', { index: i + 1, of: urls.length, url })
       try {
         const raw = await getPageText(browser, url)
+        const author = extractAuthor(raw)
         const minimal = buildMinimalDoc(raw)
         log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length })
         const data = await extractArticle(minimal)
@@ -113,6 +121,7 @@ async function run() {
           body: data.body,
           location: data.location,
           media: data.media,
+          author,
           source: SOURCE_NAME,
           sourceUrl: url,
           date: data.date,

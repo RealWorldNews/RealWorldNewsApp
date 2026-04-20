@@ -9,6 +9,7 @@ export type ArticlePayload = {
   location: string
   media: string
   videoUrl?: string
+  author?: string
   source: string
   sourceUrl: string
   date: string

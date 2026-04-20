@@ -129,6 +129,12 @@ async function run() {
         const h1 = $doc('h1.post__title').first().text().trim() || $doc('h1').first().text().trim()
         const excerpt = $doc('p.post__excerpt').first().text().trim()
         const directBody = extractBodyText($doc)
+        const authorNames: string[] = []
+        $doc('.post__authors a, .post__author a, .content-card__author, .PostByline-name, a[rel="author"]').each((_, el) => {
+          const name = $doc(el).text().trim()
+          if (name && !authorNames.includes(name)) authorNames.push(name)
+        })
+        const author = authorNames.join(', ')
         const minimal = buildMinimalDoc(raw)
         log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(ogImg) })
         const data = await extractArticle(minimal)
@@ -145,6 +151,7 @@ async function run() {
           body,
           location: data.location,
           media: ogImg || data.media,
+          author,
           source: SOURCE_NAME,
           sourceUrl: url,
           date: publishedTime || data.date,

@@ -120,6 +120,12 @@ async function run() {
         const raw = await getPageText(browser, url)
         const $doc = cheerio.load(raw)
         const ogImg = $doc('meta[property="og:image"]').attr('content') ?? ''
+        const authorNames: string[] = []
+        $doc('p.author a, .entry-byline a[href*="/author/"]').each((_, el) => {
+          const name = $doc(el).text().trim()
+          if (name && !authorNames.includes(name)) authorNames.push(name)
+        })
+        const author = authorNames.join(', ')
         const minimal = buildMinimalDoc(raw)
         log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(ogImg) })
         const data = await extractArticle(minimal)
@@ -134,6 +140,7 @@ async function run() {
           body: data.body,
           location: data.location,
           media: ogImg || data.media,
+          author,
           source: SOURCE_NAME,
           sourceUrl: url,
           date: data.date,

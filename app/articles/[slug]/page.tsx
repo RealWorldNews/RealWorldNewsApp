@@ -103,9 +103,14 @@ export default async function ArticleDetailPage({ params }: ArticleDetailParams)
     image: article.media ? [article.media] : undefined,
     datePublished: article.date ? new Date(article.date).toISOString() : undefined,
     dateModified: article.date ? new Date(article.date).toISOString() : undefined,
-    author: article.source
-      ? { "@type": "Organization", name: article.source, url: article.sourceUrl || undefined }
-      : undefined,
+    author: article.author
+      ? article.author
+          .split(",")
+          .map((name) => ({ "@type": "Person", name: name.trim() }))
+          .filter((a) => a.name.length > 0)
+      : article.source
+        ? { "@type": "Organization", name: article.source, url: article.sourceUrl || undefined }
+        : undefined,
     publisher: {
       "@type": "NewsMediaOrganization",
       name: "Real World News",
@@ -139,6 +144,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailParams)
         <h1 className={classes.title}>{article.headline}</h1>
         {article.summary && <p className={classes.summary}>{article.summary}</p>}
         <div className={classes.meta}>
+          {article.author && <span>By {article.author}</span>}
           {article.location && <span>{article.location}</span>}
           <span>{humanReadableDate}</span>
         </div>
