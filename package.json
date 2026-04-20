@@ -8,8 +8,14 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "scrape:template": "ts-node --project scrapers/tsconfig.json scrapers/sources/_template.ts",
-    "scrape:all": "npm run scrape:template",
+    "scraper:template": "ts-node --project scrapers/tsconfig.json scrapers/sources/_template.ts",
+    "scraper:aljazeera": "ts-node --project scrapers/tsconfig.json scrapers/sources/aljazeera.ts",
+    "scraper:bbc": "ts-node --project scrapers/tsconfig.json scrapers/sources/bbc.ts",
+    "scraper:democracynow": "ts-node --project scrapers/tsconfig.json scrapers/sources/democracynow.ts",
+    "scraper:borderlandbeat": "ts-node --project scrapers/tsconfig.json scrapers/sources/borderlandbeat.ts",
+    "scraper:npr": "ts-node --project scrapers/tsconfig.json scrapers/sources/npr.ts",
+    "scraper:jacobin": "ts-node --project scrapers/tsconfig.json scrapers/sources/jacobin.ts",
+    "scraper:all": "npm run scraper:aljazeera && npm run scraper:bbc && npm run scraper:democracynow && npm run scraper:borderlandbeat && npm run scraper:npr && npm run scraper:jacobin",
     "db:clear": "ts-node --project scrapers/tsconfig.json scripts/db-clear.ts"
   },
   "dependencies": {
@@ -34,9 +40,8 @@
     "eslint": "^9",
     "eslint-config-next": "^16.2.4",
     "postcss": "^8",
-    "prisma": "^5.10.2",
+    "prisma": "^5.22.0",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5.4.3",
-    "prisma": "^5.22.0"
+    "typescript": "^5.4.3"
   }
 }

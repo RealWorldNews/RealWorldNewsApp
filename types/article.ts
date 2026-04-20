@@ -6,5 +6,8 @@ export interface Article {
   body: string;
   location: string;
   media: string;
+  videoUrl: string;
+  source: string;
+  sourceUrl: string;
   date: Date;
 }

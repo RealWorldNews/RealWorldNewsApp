@@ -13,6 +13,16 @@
   --gradient-nav: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(30, 30, 30, 0.9) 50%, rgba(0, 0, 0, 1) 100%);
   --link: #5AC8FAFF;
   --blur-rgb: 0, 0, 0;
+
+  --size-1: 0.25rem;
+  --size-2: 0.5rem;
+  --size-3: 0.75rem;
+  --size-4: 1rem;
+  --size-5: 1.25rem;
+  --size-6: 1.5rem;
+  --size-8: 2rem;
+  --size-12: 3rem;
+  --size-16: 4rem;
 }
 
 @media (prefers-color-scheme: dark) {

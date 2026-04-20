@@ -1,24 +1,24 @@
 .searchBar {
-    width: 50%;
-    margin: -1rem auto -1.9rem;
-    padding: 0.3rem 0;
-    border: none;
-    border-bottom: 1px solid var(--foreground);
-    background-color: var(--background);
-    color: var(--foreground);
-    font-size: 16px;
-    text-align: left;
-    border-radius: 0;
-  }
-  
-  .searchBar::placeholder {
-    color: var(--foreground);
-  }
-  
-  .searchBar:focus {
-    outline: none;
-    border-bottom-color: var(--foreground);
-    background-color: var(--background); 
-  }
-  
+  inline-size: 100%;
+  max-inline-size: 28rem;
+  padding-block: var(--size-3);
+  padding-inline: var(--size-5);
+  border: 1px solid rgba(var(--muted-text-rgb), 0.4);
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 1rem;
+  text-align: start;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
 
+.searchBar::placeholder {
+  color: rgba(var(--muted-text-rgb), 0.7);
+}
+
+.searchBar:focus {
+  outline: none;
+  border-color: var(--link);
+  box-shadow: 0 0 0 3px rgba(90, 200, 250, 0.2);
+}

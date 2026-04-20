@@ -8,7 +8,7 @@ Daily news site. Scrapers pull articles from news sources, Claude Haiku extracts
 
 - **Next.js** — App Router, no `src/` folder
 - **TypeScript** — strict (`strict: true` in tsconfig)
-- **Styling** — Tailwind CSS
+- **Styling** — CSS Modules only. No Tailwind. Mobile-first. CSS Grid for 2D layouts, flexbox for 1D inline groupings.
 - **Database** — Vercel Postgres via Prisma (`POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`)
 - **Hosting** — Vercel
 - **Scrapers** — Playwright + Claude Haiku, excluded from the Next build, run via ts-node locally or GitHub Actions cron (see `SCRAPERS.md`)
@@ -63,54 +63,50 @@ Ingestion endpoint upserts by `slug`. Running a scraper twice is safe.
 
 ---
 
-## CSS — mobile-first, CSS Grid (via Tailwind)
+## CSS — mobile-first, CSS Modules only
 
-Tailwind here, but the same 2025/2026 CSS principles apply. Use Tailwind utilities to express them.
+Global vars live in `app/globals.css`. Co-located `*.module.css` files next to each component. No Tailwind.
 
 ### Layout model
 
-- **`grid` for any 2D or page-level layout** — card lists, headers, page sections. In Tailwind: `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`.
-- **`flex` only for 1D inline/small things** — nav link rows, button groups, icon+label pairs.
-- **Never use fixed `height` on containers** — let content + padding define height. `h-screen` / `min-h-screen` is fine for full-viewport shells only.
-- **Never use `float`**.
+- **`display: grid`** for any 2D or page-level layout (header, page sections, card grids).
+- **`display: flex`** only for 1D inline/small things (nav rows, button groups, icon+label pairs).
+- **Never use `float` or fixed `height`** on containers — let content + padding define height.
+- **When using `overflow: auto` inside grid**, set `grid-template-columns: minmax(0, 1fr)` on the parent and `min-inline-size: 0` on the scroll container — otherwise nowrap flex content will push the grid track wider than the viewport.
 
 ### Mobile-first
 
-- **Base styles target the smallest screen**, then layer Tailwind breakpoint variants on top: `sm:`, `md:`, `lg:`.
-- **Breakpoints**: `md` (768px) for tablet, `lg` (1024px) for desktop. Add others only when the design needs them.
-- **Never write `max-*:` variants** (or `@media (max-width: ...)` in raw CSS). Always go min-width / mobile-first.
-
-```tsx
-// Good — mobile-first, progressive enhancement
-<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-
-// Bad — desktop-first, fighting yourself at smaller sizes
-<div className="grid grid-cols-3 max-md:grid-cols-1">
-```
+- Write base styles for the smallest screen, then layer `@media (min-width: ...)` on top.
+- Breakpoints: `768px` (tablet), `1024px` (desktop). No `max-width:` queries.
 
 ### Spacing
 
-- **Use `gap` on grid/flex containers**, not margins on children. `gap-4`, `gap-x-6`, etc.
-- **Stick to the Tailwind spacing scale** (`p-4`, `mt-6`, …). Don't sprinkle arbitrary values (`p-[13px]`) unless the design actually needs them.
+- Use `gap` on grid/flex containers instead of margins on children.
+- All spacing from `--size-*` variables — no raw `px`/`rem` literals.
 
 ### Logical properties
 
-Tailwind supports logical-property utilities — prefer them for anything that could be RTL-sensitive or flow-directional:
+- `padding-block`/`padding-inline` over `padding-top/bottom/left/right`
+- `margin-block`/`margin-inline` over `margin-top/bottom/left/right`
+- `inline-size` / `block-size` over `width` / `height`
+- `inset-inline-start` over `left`
 
-- `ps-*` / `pe-*` over `pl-*` / `pr-*` (padding-inline-start/end)
-- `ms-*` / `me-*` over `ml-*` / `mr-*`
-- `start-*` / `end-*` over `left-*` / `right-*`
-- `py-*` / `px-*` still fine for explicit block/inline axes
+### Colors
+
+- All colors via CSS variables from `globals.css` — never hardcoded hex.
+- WCAG: when a pill/chip is filled with an accent color (`--link`), use `color: #0a0a0a` + `font-weight: 700` on the text. White on the light-blue accent fails 4.5:1 contrast.
 
 ### Images
 
-- Use `next/image` with `className="block"` to kill the inline-baseline gap.
-- Give `width` and `height` or use `fill` with a sized parent.
+- `next/image` with `className` that sets `display: block` to kill inline-baseline gap.
+- With `fill`, parent needs `position: relative` and `aspect-ratio` or explicit dimensions.
 
-### Don't
+### Filter/tab rails
 
-- Hardcode hex colors inline when a Tailwind token covers it (e.g. `text-white`, `bg-zinc-900`). Reach for arbitrary values only when the design genuinely requires a one-off shade.
-- Use fixed `px` widths on page containers. Prefer `max-w-*`, `w-full`, `fr` in grid templates.
+Chip rows scale poorly with flex-wrap once you have 6+ options. The pattern used in `SourceTabs` and `CategoryFilter`:
+- Mobile: horizontal-scroll rail (`overflow-x: auto`, `flex-wrap: nowrap`) with left/right fade gradients from `--background` and `scroll-snap-type: x proximity`.
+- Desktop (≥768px): switch to `flex-wrap: wrap; justify-content: center; overflow: visible`.
+- Auto-center the active chip with `el.scrollIntoView({ inline: 'center' })` in a `useEffect` keyed on the active value.
 
 ---
 
@@ -136,10 +132,12 @@ git add prisma/schema.prisma prisma/migrations/
 TL;DR:
 
 - Lives in `scrapers/` (excluded from the Next build via `tsconfig.json`)
-- Run locally: `npm run scrape:<source>` or `npm run scrape:all`
-- Runs on GitHub Actions cron daily at 10:00 UTC (06:00 EDT / 05:00 EST)
-- Env vars: `ANTHROPIC_API_KEY`, `INGEST_URL`, `INGEST_SECRET`, optional `SCRAPE_LIMIT`
-- Clear: `npm run db:clear -- <slug-prefix>` or `-- --all`
+- Run locally: `npm run scraper:<source>` or `npm run scraper:all`
+- Runs on GitHub Actions cron daily at 11:00 UTC (07:00 EDT / 06:00 EST)
+- Env vars: `ANTHROPIC_API_KEY`, `INGEST_URL`, `INGEST_SECRET`, optional `SCRAPE_LIMIT` (default 15, `0` = unlimited)
+- Clear: `npm run db:clear -- <source-name>` or `-- --all`
+- Haiku uses **tool-use mode** (`extract_article` tool) for strict-typed JSON output — no regex/JSON.parse brittleness
+- Per-source refresh: scrape-to-memory, then DELETE only that source, then insert — partial failures never wipe yesterday's data
 
 ---
 

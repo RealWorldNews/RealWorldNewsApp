@@ -16,50 +16,57 @@ export type ExtractedArticle = {
 
 const SYSTEM_PROMPT = `You extract structured news article data from raw HTML or cleaned page text.
 
-Return a single JSON object that matches this TypeScript type exactly, and nothing else:
-{
-  "headline": string,       // the article's main headline, plain text
-  "summary": string,        // 1-2 sentence standfirst / deck; empty string if none
-  "body": string,           // the full article body as readable plain text (paragraphs separated by blank lines). Strip nav, ads, related-links, comments.
-  "location": string,       // city/region the story is about; empty string if unclear
-  "media": string,          // comma-separated image URLs for the article (hero first). Empty string if none.
-  "date": string            // ISO 8601 UTC, e.g. "2026-04-19T00:00:00.000Z". Use the publication date from the page; fall back to today if missing.
-}
-
 Rules:
-- Output ONLY the JSON. No prose, no markdown fencing.
 - Do not fabricate fields. Use "" for unknown strings.
 - Keep body faithful to the original wording; do not summarize.
-- Media URLs must be absolute https URLs.`
+- Media URLs must be absolute https URLs.
+- Date must be ISO 8601 UTC (e.g. "2026-04-19T00:00:00.000Z"). Use the publication date from the page; fall back to today if missing.
+- Return the structured data via the extract_article tool.`
+
+const EXTRACT_TOOL = {
+  name: 'extract_article',
+  description: 'Return the extracted news article fields',
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      headline: { type: 'string', description: "The article's main headline, plain text." },
+      summary: { type: 'string', description: '1-2 sentence standfirst / deck. Empty string if none.' },
+      body: {
+        type: 'string',
+        description:
+          'The full article body as readable plain text, paragraphs separated by blank lines. Strip nav, ads, related-links, comments.',
+      },
+      location: { type: 'string', description: 'City/region the story is about. Empty string if unclear.' },
+      media: { type: 'string', description: 'Comma-separated absolute https image URLs (hero first). Empty string if none.' },
+      date: { type: 'string', description: 'ISO 8601 UTC publication date.' },
+    },
+    required: ['headline', 'summary', 'body', 'location', 'media', 'date'],
+  },
+}
 
 export async function extractArticle(pageText: string): Promise<ExtractedArticle> {
   const res = await client.messages.create({
     model: MODEL,
-    max_tokens: 2048,
+    max_tokens: 4096,
     system: SYSTEM_PROMPT,
+    tools: [EXTRACT_TOOL],
+    tool_choice: { type: 'tool', name: 'extract_article' },
     messages: [{ role: 'user', content: pageText.slice(0, 200_000) }],
   })
 
-  const first = res.content[0]
-  if (!first || first.type !== 'text') {
-    throw new Error('Haiku returned no text content')
+  const toolUse = res.content.find(block => block.type === 'tool_use')
+  if (!toolUse || toolUse.type !== 'tool_use') {
+    throw new Error('Haiku did not return a tool_use block')
   }
-  const raw = first.text.trim()
-  const json = raw.startsWith('```') ? raw.replace(/^```(?:json)?|```$/g, '').trim() : raw
 
-  let parsed: ExtractedArticle
-  try {
-    parsed = JSON.parse(json)
-  } catch (err) {
-    throw new Error(`Haiku returned invalid JSON: ${raw.slice(0, 200)}`)
-  }
+  const input = toolUse.input as Partial<ExtractedArticle>
 
   return {
-    headline: parsed.headline ?? '',
-    summary: parsed.summary ?? '',
-    body: parsed.body ?? '',
-    location: parsed.location ?? '',
-    media: parsed.media ?? '',
-    date: parsed.date ?? new Date().toISOString(),
+    headline: input.headline ?? '',
+    summary: input.summary ?? '',
+    body: input.body ?? '',
+    location: input.location ?? '',
+    media: input.media ?? '',
+    date: input.date ?? new Date().toISOString(),
   }
 }

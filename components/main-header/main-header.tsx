@@ -5,7 +5,7 @@ export default function MainHeader() {
   return (
     <header className={classes.header}>
       <NavLink href='/'>
-      <p><span className={classes.highlight}>Real World News</span>🌎</p>
+      <p><span className={classes.highlight}>Real World News</span><span className={classes.globe}>🌎</span></p>
       </NavLink>
       
       <nav className={classes.nav}>

@@ -16,5 +16,5 @@ export const env = {
   ANTHROPIC_API_KEY: required('ANTHROPIC_API_KEY'),
   INGEST_URL: required('INGEST_URL'),
   INGEST_SECRET: required('INGEST_SECRET'),
-  SCRAPE_LIMIT: Number(process.env.SCRAPE_LIMIT ?? 10),
+  SCRAPE_LIMIT: Number(process.env.SCRAPE_LIMIT ?? 15),
 }

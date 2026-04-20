@@ -8,6 +8,9 @@ export type ArticlePayload = {
   body: string
   location: string
   media: string
+  videoUrl?: string
+  source: string
+  sourceUrl: string
   date: string
 }
 
@@ -53,4 +56,20 @@ export async function ingestAll(source: string, items: ArticlePayload[]): Promis
     result[outcome] += 1
   }
   return result
+}
+
+export async function clearSource(sourceTag: string, sourceName: string): Promise<number> {
+  const url = new URL(env.INGEST_URL)
+  url.searchParams.set('source', sourceName)
+  const res = await fetch(url.toString(), {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${env.INGEST_SECRET}` },
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    error(sourceTag, 'clear-failed', { status: res.status, body: text.slice(0, 300) })
+    throw new Error(`clearSource failed: ${res.status}`)
+  }
+  const body = (await res.json().catch(() => ({}))) as { deleted?: number }
+  return body.deleted ?? 0
 }

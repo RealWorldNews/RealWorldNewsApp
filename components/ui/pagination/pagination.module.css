@@ -1,64 +1,61 @@
-.pagination-wrapper-index {
-  position: sticky;
-  bottom: 50px; 
-  background-color: transparent; /* Ensure it stands out */
-  padding: 10px 0;
-  display: flex;
-  justify-content: center;
-  margin-top: -20px; 
-}
-.pagination-wrapper-default {
-  position: sticky;
-  bottom: 50px;
-  background-color: transparent;
-  padding: 5px 0;
-  display: flex;
-  justify-content: center;
-  margin-top: -10px; /* Negative margin to pull pagination closer */
-  margin-bottom: 10px;
-}
-
-
 .pagination {
   display: flex;
+  align-items: center;
   justify-content: center;
-  width: 100%;
+  gap: var(--size-2);
+  margin-block-start: var(--size-8);
+  margin-block-end: var(--size-12);
+}
+
+.button,
+.pageNumber {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding-inline: var(--size-3);
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: rgb(var(--muted-text-rgb));
+  font-family: "Fira Code", monospace;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px;
-  display: flex;
-  align-items: center;
+  font-size: 1.4rem;
+  line-height: 1;
 }
 
-.button svg {
-  width: 26px;
-  height: 26px;
-  fill: var(--foreground); /* Default color */
+.button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
-.button:hover svg {
-  opacity: 65%;
+.button:not(:disabled):hover,
+.pageNumber:not(.active):hover {
+  color: var(--foreground);
+  border-color: rgba(var(--muted-text-rgb), 0.3);
 }
 
-.pageNumber {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  margin: 0 5px;
-  color: var(--foreground); /* Default color */
-}
-
-.pageNumber:hover {
-  opacity: 65%;/* Hover color */
+.ellipsis {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.75rem;
+  block-size: 2.75rem;
+  color: rgb(var(--muted-text-rgb));
+  font-family: "Fira Code", monospace;
+  font-size: 1.1rem;
+  user-select: none;
 }
 
 .pageNumber.active {
-  opacity: 65%; /* Optional: add an underline to the active page */
+  background: var(--link);
+  color: #0a0a0a;
+  border-color: var(--link);
+  font-weight: 700;
+  pointer-events: none;
 }
