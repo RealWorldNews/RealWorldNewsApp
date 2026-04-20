@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, useTransition } from "react";
 import classes from "./search-bar.module.css";
 
 interface SearchBarProps {
@@ -9,14 +9,12 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ initialQuery }: SearchBarProps) {
-  const [search, setSearch] = useState(initialQuery || "");
+  const [value, setValue] = useState(initialQuery);
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setSearch(initialQuery);
-  }, [initialQuery]);
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     return () => {
@@ -24,29 +22,31 @@ export default function SearchBar({ initialQuery }: SearchBarProps) {
     };
   }, []);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearch(value);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const next = e.target.value;
+    setValue(next);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
       params.delete("page");
-      if (value.trim()) {
-        params.set("q", value);
+      if (next.trim()) {
+        params.set("q", next);
       } else {
         params.delete("q");
       }
       const qs = params.toString();
-      router.push(qs ? `/?${qs}` : "/");
-    }, 250);
+      startTransition(() => {
+        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      });
+    }, 300);
   };
 
   return (
     <input
       type="text"
-      value={search}
-      onChange={handleSearch}
+      value={value}
+      onChange={handleChange}
       placeholder="search ..."
       className={classes.searchBar}
     />
