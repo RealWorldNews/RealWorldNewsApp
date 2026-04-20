@@ -21,37 +21,35 @@ export default function ArticleItem({
   });
   return (
     <li>
-      <article className={classes.article}>
-        <div className={classes.image}>
-          {media && (
-            <Image
-              src={media}
-              alt={slug}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          )}
-          {videoUrl && (
-            <span className={classes.videoBadge} aria-label="Video">▶ Video</span>
-          )}
-        </div>
-        <header className={classes.header}>
-          <h2 className={classes.title}>
-            <Link href={`/articles/${slug}`} className={classes.titleLink}>
-              {headline}
-            </Link>
-          </h2>
-          <div className={classes.meta}>
-            {author && <span>By {author}</span>}
-            {location && <span>{location}</span>}
-            <span>{humanReadableDate}</span>
+      <Link href={`/articles/${slug}`} className={classes.card}>
+        <article className={classes.article}>
+          <div className={classes.image}>
+            {media && (
+              <Image
+                src={media}
+                alt={slug}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+            )}
+            {videoUrl && (
+              <span className={classes.videoBadge} aria-label="Video">▶ Video</span>
+            )}
           </div>
-        </header>
-        {summary && <p className={classes.summary}>{summary}</p>}
-        <div className={classes.actions} aria-hidden="true">
-          View Details →
-        </div>
-      </article>
+          <header className={classes.header}>
+            <h2 className={classes.title}>{headline}</h2>
+            <div className={classes.meta}>
+              {author && <span>By {author}</span>}
+              {location && <span>{location}</span>}
+              <span>{humanReadableDate}</span>
+            </div>
+          </header>
+          {summary && <p className={classes.summary}>{summary}</p>}
+          <div className={classes.actions} aria-hidden="true">
+            View Details →
+          </div>
+        </article>
+      </Link>
     </li>
   );
 }
