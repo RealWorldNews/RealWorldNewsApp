@@ -7,11 +7,31 @@ import { clearSource, ingestAll, type ArticlePayload } from '../lib/ingest'
 import { slugify } from '../lib/slugify'
 import { error, log } from '../lib/logger'
 
-const SOURCE = 'borderlandbeat'
-const SOURCE_NAME = 'Borderland Beat'
-const BASE_URL = 'https://www.borderlandbeat.com'
-const INDEX_URL = BASE_URL
-const POST_PATH = /^https:\/\/www\.borderlandbeat\.com\/\d{4}\/\d{1,2}\/[a-z0-9-]+\.html$/
+const SOURCE = 'courthousenews'
+const SOURCE_NAME = 'Courthouse News'
+const BASE_URL = 'https://www.courthousenews.com'
+const INDEX_URL = 'https://courthousenews.com/'
+const STORY_PATH = /^https:\/\/(?:www\.)?courthousenews\.com\/(?!(?:category|author|tag|page|wp-content|wp-admin|wp-includes|feed)\/)[a-z0-9][a-z0-9-]*\/?$/
+
+async function dismissPopup(page: Awaited<ReturnType<Browser['newPage']>>) {
+  const selectors = [
+    'button[aria-label="Close"]',
+    'button[aria-label*="close" i]',
+    '.popup-close',
+    '.modal-close',
+    '.close-button',
+    'button.close',
+    '[class*="newsletter"] button[class*="close"]',
+  ]
+  for (const sel of selectors) {
+    try {
+      await page.click(sel, { timeout: 1_500 })
+      return
+    } catch {
+      // try next
+    }
+  }
+}
 
 async function getArticleLinks(browser: Browser): Promise<string[]> {
   const page = await browser.newPage({
@@ -20,9 +40,10 @@ async function getArticleLinks(browser: Browser): Promise<string[]> {
   })
   try {
     await page.goto(INDEX_URL, { waitUntil: 'domcontentloaded', timeout: 30_000 })
+    await dismissPopup(page)
 
     const hrefs = await page.$$eval(
-      '.post.hentry h3.post-title a',
+      '.arpr_article_preview h2 a, .arpr_article_preview .image a',
       els => els.map(el => (el as HTMLAnchorElement).getAttribute('href') ?? ''),
     )
 
@@ -31,12 +52,12 @@ async function getArticleLinks(browser: Browser): Promise<string[]> {
     for (const href of hrefs) {
       if (!href) continue
       const full = href.startsWith('http') ? href : `${BASE_URL}${href}`
-      if (!POST_PATH.test(full)) continue
+      if (!STORY_PATH.test(full)) continue
       if (seen.has(full)) continue
       seen.add(full)
       allMatches.push(full)
     }
-    log(SOURCE, 'candidates', { totalOnPage: hrefs.length, matchingPostUrls: allMatches.length })
+    log(SOURCE, 'candidates', { totalOnPage: hrefs.length, matchingStoryUrls: allMatches.length })
     return env.SCRAPE_LIMIT > 0 ? allMatches.slice(0, env.SCRAPE_LIMIT) : allMatches
   } finally {
     await page.close()
@@ -46,40 +67,38 @@ async function getArticleLinks(browser: Browser): Promise<string[]> {
 function buildMinimalDoc(html: string): string {
   const $ = cheerio.load(html)
 
-  // Drop noise — related posts, share buttons, comments, reactions
-  $('.related-postbwrap, .post-share-buttons, .reaction-buttons, .postmeta-secondary, #bpostrelated-post, .breadcrumb-bwrap').remove()
+  $('aside, .related-articles, #email-subscribers, .article-categories, .share, .footer_widgets, .article-author-follow, script, style, noscript, iframe').remove()
 
   const metas = [
     $('meta[property="og:title"]'),
     $('meta[property="og:description"]'),
     $('meta[property="og:image"]'),
     $('meta[property="article:published_time"]'),
+    $('meta[property="article:modified_time"]'),
     $('meta[name="description"]'),
   ]
     .map(el => (el.length ? $.html(el) : ''))
     .filter(Boolean)
     .join('\n')
 
-  const h1 = $('.post-title.entry-title').first().text().trim() || $('h1').first().text().trim()
-  const dateText = $('.meta_date').first().text().trim()
-  const author = $('.meta_pbtauthor').first().text().trim()
-  const heroImg = $('.post-body img').first().attr('src') ?? ''
+  const h1 = $('.article-header h1').first().text().trim() || $('h1').first().text().trim()
+  const excerpt = $('.article-header .excerpt').first().text().trim()
+  const ogImg = $('meta[property="og:image"]').attr('content') ?? ''
+  const heroImg = ogImg || $('figure.featured-image img').first().attr('src') || ''
+  const dateText = $('.author-date span').first().text().trim().replace(/^\/\s*/, '')
 
   const bodyParas: string[] = []
-  const container = $('.post-body.entry-content').first()
-  container.find('p, h2, h3').each((_, el) => {
-    const $el = $(el)
-    const text = $el.text().trim()
-    if (!text) return
-    const tag = ($el.prop('tagName') as string | undefined)?.toLowerCase()
-    bodyParas.push(tag === 'h2' || tag === 'h3' ? `<h2>${text}</h2>` : `<p>${text}</p>`)
+  const container = $('.article-content').first()
+  container.find('> p').each((_, el) => {
+    const text = $(el).text().trim()
+    if (text) bodyParas.push(`<p>${text}</p>`)
   })
 
   return `<!doctype html><html><head>${metas}</head><body>
 <h1>${h1}</h1>
+${excerpt ? `<p class="dek">${excerpt}</p>` : ''}
 ${heroImg ? `<img src="${heroImg}">` : ''}
 ${dateText ? `<time>${dateText}</time>` : ''}
-${author ? `<p class="author">${author}</p>` : ''}
 ${bodyParas.join('\n')}
 </body></html>`
 }
@@ -101,10 +120,8 @@ async function run() {
         const raw = await getPageText(browser, url)
         const $doc = cheerio.load(raw)
         const ogImg = $doc('meta[property="og:image"]').attr('content') ?? ''
-        const bodyImg = $doc('.post-body img').first().attr('src') ?? ''
-        const heroImg = ogImg || bodyImg
         const minimal = buildMinimalDoc(raw)
-        log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(heroImg) })
+        log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(ogImg) })
         const data = await extractArticle(minimal)
         if (!data.headline) {
           log(SOURCE, 'skipped-no-headline', { url })
@@ -116,7 +133,7 @@ async function run() {
           summary: data.summary,
           body: data.body,
           location: data.location,
-          media: heroImg || data.media,
+          media: ogImg || data.media,
           source: SOURCE_NAME,
           sourceUrl: url,
           date: data.date,

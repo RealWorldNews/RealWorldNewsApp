@@ -7,11 +7,11 @@ import { clearSource, ingestAll, type ArticlePayload } from '../lib/ingest'
 import { slugify } from '../lib/slugify'
 import { error, log } from '../lib/logger'
 
-const SOURCE = 'borderlandbeat'
-const SOURCE_NAME = 'Borderland Beat'
-const BASE_URL = 'https://www.borderlandbeat.com'
+const SOURCE = 'intercept'
+const SOURCE_NAME = 'The Intercept'
+const BASE_URL = 'https://theintercept.com'
 const INDEX_URL = BASE_URL
-const POST_PATH = /^https:\/\/www\.borderlandbeat\.com\/\d{4}\/\d{1,2}\/[a-z0-9-]+\.html$/
+const STORY_PATH = /^https:\/\/theintercept\.com\/\d{4}\/\d{1,2}\/\d{1,2}\/[a-z0-9-]+\/?$/
 
 async function getArticleLinks(browser: Browser): Promise<string[]> {
   const page = await browser.newPage({
@@ -22,7 +22,7 @@ async function getArticleLinks(browser: Browser): Promise<string[]> {
     await page.goto(INDEX_URL, { waitUntil: 'domcontentloaded', timeout: 30_000 })
 
     const hrefs = await page.$$eval(
-      '.post.hentry h3.post-title a',
+      'a.content-card__link, a.wide-story-card__link, article a[href*="/20"]',
       els => els.map(el => (el as HTMLAnchorElement).getAttribute('href') ?? ''),
     )
 
@@ -30,44 +30,66 @@ async function getArticleLinks(browser: Browser): Promise<string[]> {
     const allMatches: string[] = []
     for (const href of hrefs) {
       if (!href) continue
-      const full = href.startsWith('http') ? href : `${BASE_URL}${href}`
-      if (!POST_PATH.test(full)) continue
+      const clean = href.split('?')[0].split('#')[0]
+      const full = clean.startsWith('http') ? clean : `${BASE_URL}${clean}`
+      if (!STORY_PATH.test(full)) continue
       if (seen.has(full)) continue
       seen.add(full)
       allMatches.push(full)
     }
-    log(SOURCE, 'candidates', { totalOnPage: hrefs.length, matchingPostUrls: allMatches.length })
+    log(SOURCE, 'candidates', { totalOnPage: hrefs.length, matchingStoryUrls: allMatches.length })
     return env.SCRAPE_LIMIT > 0 ? allMatches.slice(0, env.SCRAPE_LIMIT) : allMatches
   } finally {
     await page.close()
   }
 }
 
+function extractBodyText($doc: cheerio.CheerioAPI): string {
+  const paras: string[] = []
+  const container = $doc('.entry-content__content').first()
+  container.find('> p, > h2, > h3').each((_, el) => {
+    const $el = $doc(el)
+    const text = $el.text().trim()
+    if (text) paras.push(text)
+  })
+  return paras.join('\n\n')
+}
+
 function buildMinimalDoc(html: string): string {
   const $ = cheerio.load(html)
 
-  // Drop noise — related posts, share buttons, comments, reactions
-  $('.related-postbwrap, .post-share-buttons, .reaction-buttons, .postmeta-secondary, #bpostrelated-post, .breadcrumb-bwrap').remove()
+  // Strip the heavy WP/Tailwind chrome that bloats prompts: in-article CTAs,
+  // donation forms, share menus, related/latest, newsletter embeds, ad slots.
+  $(
+    'aside, .most-read, .newsletter-embed, .promote-related-post, .ft-ab-test-case, .author-footer, .related-posts, .latest-posts, .share__menu, .article-byline__avatar, [data-module="EndOfArticle"], [data-module="InlineNewsletter"], script, style, noscript, iframe',
+  ).remove()
 
   const metas = [
     $('meta[property="og:title"]'),
     $('meta[property="og:description"]'),
     $('meta[property="og:image"]'),
     $('meta[property="article:published_time"]'),
+    $('meta[property="article:modified_time"]'),
     $('meta[name="description"]'),
   ]
     .map(el => (el.length ? $.html(el) : ''))
     .filter(Boolean)
     .join('\n')
 
-  const h1 = $('.post-title.entry-title').first().text().trim() || $('h1').first().text().trim()
-  const dateText = $('.meta_date').first().text().trim()
-  const author = $('.meta_pbtauthor').first().text().trim()
-  const heroImg = $('.post-body img').first().attr('src') ?? ''
+  const h1 = $('h1.post__title').first().text().trim() || $('h1').first().text().trim()
+  const excerpt = $('p.post__excerpt').first().text().trim()
+  const ogImg = $('meta[property="og:image"]').attr('content') ?? ''
+  const heroImg = ogImg || $('img.article-featured-image').first().attr('src') || ''
+  const timeAttr = $('time[datetime]').first().attr('datetime') ?? ''
 
+  // Body is pulled directly via extractBodyText for the payload; Haiku only
+  // needs enough context to infer location and validate the summary. Cap at
+  // the first ~10 paragraphs so long podcast transcripts don't balloon the
+  // prompt and burn output tokens on a body we discard.
   const bodyParas: string[] = []
-  const container = $('.post-body.entry-content').first()
-  container.find('p, h2, h3').each((_, el) => {
+  const container = $('.entry-content__content').first()
+  container.find('> p, > h2, > h3').each((_, el) => {
+    if (bodyParas.length >= 10) return
     const $el = $(el)
     const text = $el.text().trim()
     if (!text) return
@@ -77,9 +99,9 @@ function buildMinimalDoc(html: string): string {
 
   return `<!doctype html><html><head>${metas}</head><body>
 <h1>${h1}</h1>
+${excerpt ? `<p class="excerpt">${excerpt}</p>` : ''}
 ${heroImg ? `<img src="${heroImg}">` : ''}
-${dateText ? `<time>${dateText}</time>` : ''}
-${author ? `<p class="author">${author}</p>` : ''}
+${timeAttr ? `<time datetime="${timeAttr}"></time>` : ''}
 ${bodyParas.join('\n')}
 </body></html>`
 }
@@ -101,25 +123,31 @@ async function run() {
         const raw = await getPageText(browser, url)
         const $doc = cheerio.load(raw)
         const ogImg = $doc('meta[property="og:image"]').attr('content') ?? ''
-        const bodyImg = $doc('.post-body img').first().attr('src') ?? ''
-        const heroImg = ogImg || bodyImg
+        const publishedTime = $doc('meta[property="article:published_time"]').attr('content')
+          || $doc('time[datetime]').first().attr('datetime')
+          || ''
+        const h1 = $doc('h1.post__title').first().text().trim() || $doc('h1').first().text().trim()
+        const excerpt = $doc('p.post__excerpt').first().text().trim()
+        const directBody = extractBodyText($doc)
         const minimal = buildMinimalDoc(raw)
-        log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(heroImg) })
+        log(SOURCE, 'prompt-size', { index: i + 1, chars: minimal.length, hasImage: Boolean(ogImg) })
         const data = await extractArticle(minimal)
-        if (!data.headline) {
-          log(SOURCE, 'skipped-no-headline', { url })
+        const headline = h1 || data.headline
+        const body = directBody || data.body
+        if (!headline || !body) {
+          log(SOURCE, 'skipped-no-content', { url })
           continue
         }
         payloads.push({
-          slug: slugify(data.headline),
-          headline: data.headline,
-          summary: data.summary,
-          body: data.body,
+          slug: slugify(headline),
+          headline,
+          summary: excerpt || data.summary,
+          body,
           location: data.location,
-          media: heroImg || data.media,
+          media: ogImg || data.media,
           source: SOURCE_NAME,
           sourceUrl: url,
-          date: data.date,
+          date: publishedTime || data.date,
         })
         log(SOURCE, 'extract-done', { index: i + 1, ms: Date.now() - t0 })
       } catch (err) {

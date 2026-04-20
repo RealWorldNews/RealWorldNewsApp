@@ -25,9 +25,12 @@ export default async function Home({ searchParams }: HomeProps) {
     "Al Jazeera",
     "BBC News",
     "Borderland Beat",
+    "Courthouse News",
     "Democracy Now!",
+    "Drop Site News",
     "Jacobin",
     "NPR",
+    "The Intercept",
   ];
   const countBySource = new Map(sourceCounts.map((s) => [s.source, s.count]));
   const tabOptions = KNOWN_SOURCES.map((name) => ({

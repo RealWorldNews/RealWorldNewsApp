@@ -31,36 +31,26 @@
   text-decoration: none;
 }
 
-.header p {
-  margin: 0;
-  font-size: 1.1rem;
-  font-family: "Montserrat", sans-serif;
-  white-space: nowrap;
+.logoImage {
+  display: inline-block;
+  block-size: 1.75rem;
+  inline-size: 14.8rem;
+  background-color: var(--foreground);
+  mask-image: url('/header-logo-mono.png');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url('/header-logo-mono.png');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 }
 
 @media (min-width: 768px) {
-  .header p {
-    font-size: 1.5rem;
+  .logoImage {
+    block-size: 2.25rem;
+    inline-size: 19rem;
   }
-}
-
-.header p span {
-  white-space: nowrap;
-}
-
-.globe {
-  margin-inline-start: 0.35em;
-  display: inline-block;
-}
-
-.highlight {
-  background: var(--gradient-nav);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-family: "Montserrat", sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.1rem;
 }
 
 .nav ul {
