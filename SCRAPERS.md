@@ -5,16 +5,17 @@ Daily news scrapers for RealWorldNewsApp. Each scraper pulls article URLs from a
 ## Architecture
 
 ```
-GitHub Actions cron (11:00 UTC daily)
-  └─ npm run scraper:all
-       └─ ts-node scrapers/sources/<source>.ts (per source)
-            ├─ Playwright fetches listing + article HTML
-            ├─ Claude Haiku extracts { headline, summary, body, location, media, source, sourceUrl, date }
-            ├─ Collect all payloads in memory
-            ├─ DELETE /api/articles?source=<name>   (clears only this source, only after scrape succeeded)
-            └─ POST /api/articles per payload (Bearer INGEST_SECRET)
-                 └─ prisma.article.upsert  (slug-based dedup)
-                    + revalidatePath('/') and revalidatePath('/articles/<slug>')
+GitHub Actions cron (3x daily: 11:00, 15:00, 21:00 UTC)
+  └─ matrix: one runner per source, running in parallel (fail-fast: false, max-parallel: 6)
+       └─ npm run scraper:<source>
+            └─ ts-node scrapers/sources/<source>.ts
+                 ├─ Playwright fetches listing + article HTML
+                 ├─ Claude Haiku extracts { headline, summary, body, location, media, source, sourceUrl, date }
+                 ├─ Collect all payloads in memory
+                 ├─ DELETE /api/articles?source=<name>   (clears only this source, only after scrape succeeded)
+                 └─ POST /api/articles per payload (Bearer INGEST_SECRET)
+                      └─ prisma.article.upsert  (slug-based dedup)
+                         + revalidatePath('/') and revalidatePath('/articles/<slug>')
 ```
 
 ### Refresh strategy
@@ -142,12 +143,35 @@ The scraper reads `INGEST_URL` from `.env.local`. Point it at `http://localhost:
 
 **Manually against prod:** flip `INGEST_URL` in `.env.local` to your production URL, then run the same command. Be careful — writes go straight to the prod DB.
 
-**Scheduled (prod):** GitHub Actions runs `npm run scraper:all` every day at 11:00 UTC (07:00 EDT / 06:00 EST). Trigger an immediate run from the Actions tab → "Daily scrape" → "Run workflow".
+**Scheduled (prod):** GitHub Actions runs the matrix workflow three times daily — 11:00, 15:00, and 21:00 UTC (07:00 / 11:00 / 17:00 EDT). Each source fans out to its own runner and its own 25-min budget, so one slow source can't starve the others. The late-morning run exists because sources like Democracy Now! and Drop Site News don't post until ~13:00 UTC, so an 11 UTC run would miss them by hours.
 
 GitHub secrets required:
 - `ANTHROPIC_API_KEY`
 - `INGEST_URL` (production URL)
 - `INGEST_SECRET`
+
+**Trigger an immediate run:**
+
+From the web UI — Actions tab → "Daily scrape" → "Run workflow".
+
+From the terminal, using [GitHub CLI](https://cli.github.com/):
+
+```
+# one-time setup
+brew install gh
+gh auth login                   # GitHub.com → pick protocol → browser login
+gh repo set-default             # pick the RealWorldNewsApp remote
+
+# dispatch + live-tail
+gh workflow run scrape.yml
+gh run watch                    # pick the newest run from the list
+```
+
+Ctrl-C out of `gh run watch` anytime — the run keeps going on GitHub. To list past runs: `gh run list --workflow=scrape.yml`.
+
+### Per-call Haiku bounds
+
+Each Haiku extraction is capped at `timeout: 75_000` ms with `maxRetries: 1` (see `scrapers/lib/haiku.ts`). A single stalled API call bails in ≤150s instead of inheriting the SDK's 10-minute default, so one bad article can't eat a source's whole budget. `extractArticle` also throws if Haiku returns empty `headline`/`body`/`date`, so incomplete responses fail fast at the boundary instead of producing 422s at the ingest endpoint.
 
 ## Clearing data
 
