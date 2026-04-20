@@ -44,15 +44,24 @@ const EXTRACT_TOOL = {
   },
 }
 
+const REQUEST_TIMEOUT_MS = 75_000
+const REQUEST_MAX_RETRIES = 1
+
 export async function extractArticle(pageText: string): Promise<ExtractedArticle> {
-  const res = await client.messages.create({
-    model: MODEL,
-    max_tokens: 4096,
-    system: SYSTEM_PROMPT,
-    tools: [EXTRACT_TOOL],
-    tool_choice: { type: 'tool', name: 'extract_article' },
-    messages: [{ role: 'user', content: pageText.slice(0, 200_000) }],
-  })
+  const res = await client.messages.create(
+    {
+      model: MODEL,
+      max_tokens: 4096,
+      system: SYSTEM_PROMPT,
+      tools: [EXTRACT_TOOL],
+      tool_choice: { type: 'tool', name: 'extract_article' },
+      messages: [{ role: 'user', content: pageText.slice(0, 200_000) }],
+    },
+    {
+      timeout: REQUEST_TIMEOUT_MS,
+      maxRetries: REQUEST_MAX_RETRIES,
+    },
+  )
 
   const toolUse = res.content.find(block => block.type === 'tool_use')
   if (!toolUse || toolUse.type !== 'tool_use') {
@@ -60,13 +69,22 @@ export async function extractArticle(pageText: string): Promise<ExtractedArticle
   }
 
   const input = toolUse.input as Partial<ExtractedArticle>
+  const headline = (input.headline ?? '').trim()
+  const body = (input.body ?? '').trim()
+  const date = (input.date ?? '').trim()
+
+  if (!headline || !body || !date) {
+    throw new Error(
+      `Haiku returned incomplete article (headline=${!!headline}, body=${!!body}, date=${!!date})`,
+    )
+  }
 
   return {
-    headline: input.headline ?? '',
-    summary: input.summary ?? '',
-    body: input.body ?? '',
-    location: input.location ?? '',
-    media: input.media ?? '',
-    date: input.date ?? new Date().toISOString(),
+    headline,
+    summary: (input.summary ?? '').trim(),
+    body,
+    location: (input.location ?? '').trim(),
+    media: (input.media ?? '').trim(),
+    date,
   }
 }

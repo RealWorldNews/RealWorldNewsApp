@@ -5,10 +5,29 @@ on:
     - cron: '0 11 * * *'
   workflow_dispatch:
 
+concurrency:
+  group: scrape-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        source:
+          - aljazeera
+          - bbc
+          - borderlandbeat
+          - courthousenews
+          - democracynow
+          - dropsitenews
+          - intercept
+          - jacobin
+          - npr
+    name: scrape-${{ matrix.source }}
     steps:
       - uses: actions/checkout@v4
 
@@ -21,10 +40,10 @@ jobs:
 
       - run: npx playwright install --with-deps chromium
 
-      - name: Run all scrapers
+      - name: Run scraper (${{ matrix.source }})
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           INGEST_URL: ${{ secrets.INGEST_URL }}
           INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
           SCRAPE_LIMIT: '15'
-        run: npm run scraper:all
+        run: npm run scraper:${{ matrix.source }}
