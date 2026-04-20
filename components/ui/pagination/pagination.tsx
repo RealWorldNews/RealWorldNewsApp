@@ -1,60 +1,69 @@
-// Pagination.tsx
 'use client';
 
 import styles from './pagination.module.css';
-import ChevronRightIcon from '../icons/chevron-right';
-import ChevronLeftIcon from '../icons/chevron-left'
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (newPage: number) => void;
-  customClass?: string; // Allow customClass as an optional prop
+  customClass?: string;
+}
+
+function pageList(current: number, total: number): (number | 'ellipsis')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | 'ellipsis')[] = [1];
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  if (start > 2) pages.push('ellipsis');
+  for (let i = start; i <= end; i++) pages.push(i);
+  if (end < total - 1) pages.push('ellipsis');
+  pages.push(total);
+  return pages;
 }
 
 function Pagination({ currentPage, totalPages, onPageChange, customClass }: PaginationProps) {
-  const getDisplayedPageNumbers = () => {
-    const totalPageNumbersToShow = 6;
-    const halfRange = Math.floor(totalPageNumbersToShow / 2);
-    let start = Math.max(currentPage - halfRange, 1);
-    let end = Math.min(start + totalPageNumbersToShow - 1, totalPages);
+  if (totalPages <= 1) return null;
 
-    if (end - start + 1 < totalPageNumbersToShow) {
-      start = Math.max(end - totalPageNumbersToShow + 1, 1);
-    }
-
-    const pageNumbers = [];
-    for (let i = start; i <= end; i++) {
-      pageNumbers.push(i);
-    }
-    return pageNumbers;
-  };
-
-  const pageNumbers = getDisplayedPageNumbers();
+  const pages = pageList(currentPage, totalPages);
 
   return (
     <div className={`${styles.paginationWrapper} ${customClass ? customClass : ''}`}>
-      <div className={styles.pagination}>
-        {currentPage > 1 && (
-          <button onClick={() => onPageChange(currentPage - 1)} className={styles.button}>
-            <ChevronLeftIcon />
-          </button>
+      <nav className={styles.pagination} aria-label="Pagination">
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          className={styles.button}
+          aria-label="Previous page"
+          aria-disabled={currentPage === 1}
+          disabled={currentPage === 1}
+        >
+          ‹
+        </button>
+        {pages.map((p, i) =>
+          p === 'ellipsis' ? (
+            <span key={`e${i}`} className={styles.ellipsis} aria-hidden>
+              …
+            </span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => onPageChange(p)}
+              className={`${styles.pageNumber} ${p === currentPage ? styles.active : ''}`}
+              aria-current={p === currentPage ? 'page' : undefined}
+            >
+              {p}
+            </button>
+          ),
         )}
-        {pageNumbers.map((number) => (
-          <button
-            key={number}
-            onClick={() => onPageChange(number)}
-            className={`${styles.pageNumber} ${number === currentPage ? styles.active : ''}`}
-          >
-            {number}
-          </button>
-        ))}
-        {currentPage < totalPages && (
-          <button onClick={() => onPageChange(currentPage + 1)} className={styles.button}>
-            <ChevronRightIcon />
-          </button>
-        )}
-      </div>
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          className={styles.button}
+          aria-label="Next page"
+          aria-disabled={currentPage === totalPages}
+          disabled={currentPage === totalPages}
+        >
+          ›
+        </button>
+      </nav>
     </div>
   );
 }

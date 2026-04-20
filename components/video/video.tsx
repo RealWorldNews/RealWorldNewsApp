@@ -1,19 +1,21 @@
 import classes from './video.module.css'
+
 interface VideoProps {
-  media: string;
+  media: string
+  poster?: string
 }
 
-export default function Video({media} : VideoProps) {
+export default function Video({ media, poster }: VideoProps) {
   return (
-    <video  className={classes.video} width="320" height="240" controls preload="none">
+    <video
+      className={classes.video}
+      controls
+      preload="metadata"
+      playsInline
+      poster={poster}
+    >
       <source src={media} type="video/mp4" />
-      <track
-        src={media}
-        kind="subtitles"
-        srcLang="en"
-        label="English"
-      />
-      Your browser does not support the video tag :c.
+      Your browser does not support the video tag.
     </video>
-      );
-    }
+  )
+}

@@ -1,29 +1,186 @@
-.contact {
-    margin: 3rem auto;
-    width: 90%;
-    max-width: 50rem;
-    text-align: center;
-  }
+.wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--size-8);
+  inline-size: min(92%, 60rem);
+  margin-inline: auto;
+  margin-block: var(--size-4) var(--size-16);
+}
 
-  .contact h2 {
-    margin: 1rem;
+@media (min-width: 768px) {
+  .wrap {
+    gap: var(--size-12);
+    margin-block-start: var(--size-8);
   }
-  .contact hr {
-    margin: 1rem;
-    border: dotted 0.35rem;
-    border-bottom: none;
-    width: 90%;
+}
+
+.hero {
+  display: grid;
+  gap: var(--size-3);
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 2.75rem;
   }
-  
-  .contact a {
-    color: var(--foreground);
-    font-size: 1rem;
-    margin: 1rem;
+}
+
+.tagline {
+  margin: 0;
+  font-family: "Fira Code", monospace;
+  font-weight: 300;
+  font-size: 1rem;
+  color: rgb(var(--muted-text-rgb));
+  max-inline-size: 36rem;
+  margin-inline: auto;
+  line-height: 1.6;
+}
+
+.contact {
+  display: grid;
+  gap: var(--size-4);
+  padding: var(--size-6);
+  border-radius: 12px;
+  background-color: rgba(var(--muted-text-rgb), 0.04);
+  border: 1px solid rgba(var(--muted-text-rgb), 0.1);
+  text-align: center;
+}
+
+.contactHeading {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+}
+
+.contactActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--size-3);
+}
+
+.emailLink {
+  font-family: "Fira Code", monospace;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  letter-spacing: 0.05rem;
+}
+
+.emailLink:hover {
+  color: var(--link);
+}
+
+.donateLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+  padding-block: var(--size-2);
+  padding-inline: var(--size-5);
+  border: 1px solid var(--link);
+  border-radius: 999px;
+  color: var(--link);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.donateLink:hover,
+.donateLink:focus-visible {
+  background: var(--link);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--size-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--size-6);
   }
-  
-  .contact a:hover,
-  .contact a:active,
-  .contact a.active {
-    opacity: 60%;
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  
+}
+
+.card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--size-3);
+  padding: var(--size-5);
+  border-radius: 12px;
+  background-color: rgba(var(--muted-text-rgb), 0.04);
+  border: 1px solid rgba(var(--muted-text-rgb), 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  border-color: rgba(var(--muted-text-rgb), 0.25);
+}
+
+.category {
+  font-family: "Fira Code", monospace;
+  font-weight: 500;
+  font-size: 0.65rem;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  color: var(--link);
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--foreground);
+}
+
+.cardDesc {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgb(var(--muted-text-rgb));
+}
+
+.cardLink {
+  justify-self: start;
+  font-family: "Fira Code", monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08rem;
+  color: var(--link);
+  text-transform: lowercase;
+}
+
+.cardLink:hover {
+  opacity: 70%;
+}

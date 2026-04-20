@@ -5,8 +5,12 @@ const prisma = new PrismaClient()
 
 function usage(): never {
   console.error(`Usage:
-  npm run db:clear -- <slug-prefix>   delete articles whose slug starts with the given prefix
-  npm run db:clear -- --all           delete ALL articles`)
+  npm run db:clear -- <source>     delete articles whose source matches (case-insensitive, contains)
+  npm run db:clear -- --all        delete ALL articles
+
+Examples:
+  npm run db:clear -- "Al Jazeera"
+  npm run db:clear -- aljazeera`)
   process.exit(1)
 }
 
@@ -21,13 +25,13 @@ async function main() {
       return
     }
 
-    const prefix = args.find((a) => !a.startsWith('--'))
-    if (!prefix) usage()
+    const source = args.find((a) => !a.startsWith('--'))
+    if (!source) usage()
 
     const res = await prisma.article.deleteMany({
-      where: { slug: { startsWith: prefix } },
+      where: { source: { contains: source, mode: 'insensitive' } },
     })
-    console.log(`✓ Deleted ${res.count} articles with slug starting "${prefix}"`)
+    console.log(`✓ Deleted ${res.count} articles with source matching "${source}"`)
   } finally {
     await prisma.$disconnect()
   }
