@@ -97,21 +97,12 @@ function toISO(input: string): string {
 function extractPublishedTime($doc: cheerio.CheerioAPI): string {
   const metaTime = $doc('meta[property="article:published_time"]').attr('content')
   if (metaTime) return metaTime
-  const timeAttr = $doc('time[datetime]').first().attr('datetime')
-  if (timeAttr) return timeAttr
-  // Substack byline: plain text like "Apr 17, 2026". Search for any element whose
-  // text parses as a date.
-  let found = ''
-  $doc('.post-header div, .byline-wrapper div, [class*="meta"]').each((_, el) => {
-    if (found) return
-    const text = $doc(el).text().trim()
-    if (!text || text.length > 30) return
-    const parsed = new Date(text)
-    if (!isNaN(parsed.getTime()) && parsed.getFullYear() > 2000) {
-      found = parsed.toISOString()
-    }
-  })
-  return found
+  // Scope the <time> fallback to the article header so we don't pick up
+  // timestamps from related-post rails. No plain-text fallback: V8's Date
+  // parser is permissive enough that a byline like "Julian Andreone" can
+  // parse as "Jul" + numbers nearby and produce a July date.
+  const scopedTime = $doc('.post-header time[datetime], .byline-wrapper time[datetime]').first().attr('datetime')
+  return scopedTime ?? ''
 }
 
 function buildMinimalDoc(html: string, videoUrl: string): string {
