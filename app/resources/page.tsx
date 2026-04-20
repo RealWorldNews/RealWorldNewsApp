@@ -1,6 +1,27 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import CategoryFilter from "@/components/resources/category-filter";
 import classes from "./page.module.css";
+
+export const metadata: Metadata = {
+  title: "Resources",
+  description:
+    "Community, humanitarian, legal, and press-freedom resources curated alongside Real World News coverage.",
+  alternates: { canonical: "/resources" },
+  openGraph: {
+    title: "Resources — Real World News",
+    description:
+      "Community, humanitarian, legal, and press-freedom resources curated alongside Real World News coverage.",
+    url: "/resources",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Resources — Real World News",
+    description:
+      "Community, humanitarian, legal, and press-freedom resources curated alongside Real World News coverage.",
+  },
+};
 
 type Category =
   | "community"
