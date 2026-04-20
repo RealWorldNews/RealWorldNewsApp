@@ -1,4 +1,5 @@
 .article {
+  position: relative;
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: var(--size-3);
@@ -11,14 +12,16 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.article:hover {
+.article:hover,
+.article:focus-within {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   border-color: rgba(var(--muted-text-rgb), 0.2);
 }
 
-.imageLink {
-  display: block;
+.article:focus-within {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }
 
 .image {
@@ -43,6 +46,7 @@
   text-transform: uppercase;
   border-radius: 4px;
   pointer-events: none;
+  z-index: 1;
 }
 
 .article img {
@@ -57,7 +61,7 @@
   padding-block-start: var(--size-2);
 }
 
-.header h2 {
+.title {
   margin: 0;
   font-size: 1.125rem;
   font-family: 'Montserrat', sans-serif;
@@ -66,11 +70,20 @@
   color: var(--foreground);
 }
 
-.header a {
+.titleLink {
   color: inherit;
+  text-decoration: none;
+  outline: none;
 }
 
-.header h2:hover {
+.titleLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.article:hover .title {
   opacity: 70%;
 }
 
@@ -101,11 +114,6 @@
 .actions {
   padding-inline: var(--size-4);
   text-align: end;
-}
-
-.actions a {
-  display: inline-block;
-  padding-block: var(--size-1);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.05rem;
@@ -113,13 +121,12 @@
   text-transform: uppercase;
 }
 
-.actions a:hover,
-.actions a:active {
+.article:hover .actions {
   opacity: 70%;
 }
 
 @media (min-width: 768px) {
-  .header h2 {
+  .title {
     font-size: 1.25rem;
   }
   .summary {

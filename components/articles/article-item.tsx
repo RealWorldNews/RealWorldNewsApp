@@ -22,25 +22,25 @@ export default function ArticleItem({
   return (
     <li>
       <article className={classes.article}>
-        <Link href={`/articles/${slug}`} className={classes.imageLink}>
-          <div className={classes.image}>
-            {media && (
-              <Image
-                src={media}
-                alt={slug}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-            )}
-            {videoUrl && (
-              <span className={classes.videoBadge} aria-label="Video">▶ Video</span>
-            )}
-          </div>
-        </Link>
+        <div className={classes.image}>
+          {media && (
+            <Image
+              src={media}
+              alt={slug}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          )}
+          {videoUrl && (
+            <span className={classes.videoBadge} aria-label="Video">▶ Video</span>
+          )}
+        </div>
         <header className={classes.header}>
-          <Link href={`/articles/${slug}`}>
-            <h2>{headline}</h2>
-          </Link>
+          <h2 className={classes.title}>
+            <Link href={`/articles/${slug}`} className={classes.titleLink}>
+              {headline}
+            </Link>
+          </h2>
           <div className={classes.meta}>
             {author && <span>By {author}</span>}
             {location && <span>{location}</span>}
@@ -48,8 +48,8 @@ export default function ArticleItem({
           </div>
         </header>
         {summary && <p className={classes.summary}>{summary}</p>}
-        <div className={classes.actions}>
-          <Link href={`/articles/${slug}`}>View Details →</Link>
+        <div className={classes.actions} aria-hidden="true">
+          View Details →
         </div>
       </article>
     </li>
