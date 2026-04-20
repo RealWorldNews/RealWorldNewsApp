@@ -26,7 +26,7 @@
   --size-16: 4rem;
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
     --foreground: #EBEBF599;
     --background: 	#1C1C1EFF;
