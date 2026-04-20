@@ -133,7 +133,7 @@ TL;DR:
 
 - Lives in `scrapers/` (excluded from the Next build via `tsconfig.json`)
 - Run locally: `npm run scraper:<source>` or `npm run scraper:all`
-- Runs on GitHub Actions cron daily at 11:00 UTC (07:00 EDT / 06:00 EST)
+- Runs on GitHub Actions cron 3x daily at 11:00, 15:00, 21:00 UTC (07:00 / 11:00 / 17:00 EDT)
 - Env vars: `ANTHROPIC_API_KEY`, `INGEST_URL`, `INGEST_SECRET`, optional `SCRAPE_LIMIT` (default 15, `0` = unlimited)
 - Clear: `npm run db:clear -- <source-name>` or `-- --all`
 - Haiku uses **tool-use mode** (`extract_article` tool) for strict-typed JSON output — no regex/JSON.parse brittleness

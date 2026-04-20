@@ -49,7 +49,7 @@ export async function getArticles(
     ? searchScoped.filter((a) => a.source === source)
     : searchScoped;
 
-  const staggered = source ? filtered : interleaveBySource(filtered);
+  const staggered = source ? filtered : interleaveByDayAndSource(filtered);
   const start = (page - 1) * pageSize;
   const articles = staggered.slice(start, start + pageSize);
 
@@ -61,7 +61,12 @@ export async function getArticles(
   };
 }
 
-function interleaveBySource(articles: Article[]): Article[] {
+function dayKey(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toISOString().slice(0, 10);
+}
+
+function roundRobinBySource(articles: Article[]): Article[] {
   const queues = new Map<string, Article[]>();
   for (const a of articles) {
     const key = a.source || "unknown";
@@ -80,6 +85,22 @@ function interleaveBySource(articles: Article[]): Article[] {
         remaining--;
       }
     }
+  }
+  return out;
+}
+
+function interleaveByDayAndSource(articles: Article[]): Article[] {
+  const byDay = new Map<string, Article[]>();
+  for (const a of articles) {
+    const key = dayKey(a.date);
+    if (!byDay.has(key)) byDay.set(key, []);
+    byDay.get(key)!.push(a);
+  }
+
+  const days = Array.from(byDay.keys()).sort().reverse();
+  const out: Article[] = [];
+  for (const day of days) {
+    out.push(...roundRobinBySource(byDay.get(day)!));
   }
   return out;
 }
