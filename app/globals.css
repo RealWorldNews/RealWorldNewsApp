@@ -8,11 +8,12 @@
 @tailwind utilities;
 
 :root {
-  --foreground: #3C3C4399;
+  --foreground: #1C1C1E;
   --background:#F2F2F7FF;
   --gradient-nav: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(30, 30, 30, 0.9) 50%, rgba(0, 0, 0, 1) 100%);
   --link: #5AC8FAFF;
   --blur-rgb: 0, 0, 0;
+  --muted-text-rgb: 90, 90, 95;
 
   --size-1: 0.25rem;
   --size-2: 0.5rem;
@@ -25,13 +26,14 @@
   --size-16: 4rem;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --foreground: #EBEBF599;
     --background: 	#1C1C1EFF;
     --gradient-nav: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(245, 245, 245, 0.9) 50%, rgba(255, 255, 255, 1) 100%);
     --link: #64D2FFFF;
     --blur-rgb: 255, 255, 255;
+    --muted-text-rgb: 176, 176, 176;
   }
 }
 
@@ -53,7 +55,6 @@ body {
     var(--background);
     margin: 0;
 
-    --muted-text-rgb: 176, 176, 176;
     --highlight-gradient: linear-gradient(to right, #E61E4D 0%, #E31C5F 50%, #D70466 100%);
     --violet-rgb: 160, 122, 170;
 }
